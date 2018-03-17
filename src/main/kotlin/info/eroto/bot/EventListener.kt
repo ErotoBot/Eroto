@@ -2,6 +2,7 @@ package info.eroto.bot
 
 import info.eroto.bot.entities.StoredCommand
 import info.eroto.bot.entities.Context
+import info.eroto.bot.utils.ArgParser
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 
@@ -20,7 +21,17 @@ class EventListener : ListenerAdapter() {
         val splitted = content.split("\\s+".toRegex())
         val commandName = splitted[0]
 
-        executeCommand(event, commandName, splitted)
+        if (commandName == "help") {
+            val parts = CogManager.help()
+
+            event.author.openPrivateChannel().queue { channel ->
+                for (part in parts) {
+                    channel.sendMessage("```asciidoc\n$part```").queue()
+                }
+            }
+        } else {
+            executeCommand(event, commandName, splitted)
+        }
     }
 
     private fun executeCommand(
@@ -29,7 +40,8 @@ class EventListener : ListenerAdapter() {
             splitted: List<String>,
             baseCommand: StoredCommand? = null
     ) {
-        val args = splitted.slice(1 until splitted.size)
+        val arg = splitted.slice(1 until splitted.size).joinToString(" ")
+        val args = ArgParser.untypedParseSplit(ArgParser.tokenize(arg))
 
         val cmd = if (baseCommand != null) {
             baseCommand.subcommands[commandName] ?: return
@@ -37,8 +49,8 @@ class EventListener : ListenerAdapter() {
             CogManager.commands[commandName] ?: return
         }
 
-        if (args.isNotEmpty() && args[0] in cmd.subcommands) {
-            return executeCommand(event, args[0], args, cmd)
+        if (args.unmatched.isNotEmpty() && args.unmatched[0] in cmd.subcommands) {
+            return executeCommand(event, args.unmatched[0], arg.split(" "), cmd)
         }
 
         val ctx = Context(event, cmd, args)
