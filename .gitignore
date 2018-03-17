@@ -58,3 +58,8 @@ gradle-app.setting
 # Config files
 config.yml
 config.env
+
+# Intellij
+*.iml
+*.ipr
+lib/

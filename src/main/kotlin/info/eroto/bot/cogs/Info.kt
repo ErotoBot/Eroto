@@ -19,4 +19,19 @@ class Info : Cog() {
             ctx.event.channel.sendMessage(eb.build()).queue()
         }
     }
+
+    @Command
+    class Stats: ICommand {
+        override fun run(ctx: Context) {
+            val eb = EmbedBuilder()
+            val jda = ctx.event.jda
+            eb.setTitle("Stats", null)
+            eb.setDescription("Stats about how I'm doing!")
+            eb.addField("Servers", jda.guilds.size.toString(), true)
+            eb.addField("Channels", (jda.textChannels.size + jda.voiceChannels.size).toString(), true)
+            eb.addField("Users", jda.users.size.toString(), true)
+            eb.setThumbnail(ctx.event.jda.selfUser.avatarUrl)
+            ctx.event.channel.sendMessage(eb.build()).queue()
+        }
+    }
 }
