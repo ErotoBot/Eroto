@@ -9,8 +9,8 @@ class EventListener : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent) {
         var content = event.message.contentRaw
         val mentions = listOf(
-                "<@${event.jda.selfUser.id}>",
-                "<@!${event.jda.selfUser.id}>"
+                "<@${event.jda.selfUser.id}> ",
+                "<@!${event.jda.selfUser.id}> "
         )
 
         val usedPrefix = Eroto.config.prefixes.firstOrNull { content.startsWith(it) }

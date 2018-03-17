@@ -15,7 +15,7 @@ class StoredCommand(private val name: String, private val klass: Cog, clazz: Cla
     init {
         klass::class.java.classes.filterIsInstance<Class<ICommand>>().forEach { c ->
             c.annotations.filterIsInstance<Subcommand>().filter { it.root == name }.forEach { ann ->
-                val name = if (ann.name.isBlank()) c.simpleName else ann.name
+                val name = if (ann.name.isBlank()) c.simpleName.toLowerCase() else ann.name
                 val cmd = StoredCommand(name, klass, c)
 
                 subcommands[name] = cmd
