@@ -1,7 +1,9 @@
 package info.eroto.bot
 
+import info.eroto.bot.entities.ArgumentTypeException
 import info.eroto.bot.entities.StoredCommand
 import info.eroto.bot.entities.Context
+import info.eroto.bot.entities.MissingArgumentException
 import info.eroto.bot.utils.ArgParser
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
@@ -46,19 +48,23 @@ class EventListener : ListenerAdapter() {
         val cmd = if (baseCommand != null) {
             baseCommand.subcommands[commandName] ?: return
         } else {
-            CogManager.commands[commandName] ?: return
+            CogManager.commands[commandName] ?: CogManager.commands[CogManager.aliases[commandName]] ?: return
         }
 
         if (args.unmatched.isNotEmpty() && args.unmatched[0] in cmd.subcommands) {
             return executeCommand(event, args.unmatched[0], arg.split(" "), cmd)
         }
 
-        val ctx = Context(event, cmd, args)
-
         try {
+            val ctx = Context(event, cmd, args)
+
             cmd.run(ctx)
         } catch(e: Exception) {
-            e.printStackTrace()
+            when (e) {
+                is MissingArgumentException -> event.channel.sendMessage("Missing argument: ${e.arg}").queue()
+                is ArgumentTypeException -> event.channel.sendMessage("Invalid argument type: ${e.input} is not of type ${e.type}")
+                else -> e.printStackTrace()
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package info.eroto.bot
 
+import info.eroto.bot.annotations.Alias
 import info.eroto.bot.annotations.Command
 import info.eroto.bot.annotations.Description
 import info.eroto.bot.annotations.Subcommand
@@ -26,6 +27,10 @@ class CogManager {
                                 val name = if (ann.name.isNotBlank()) ann.name else clazz.simpleName.toLowerCase()
 
                                 commands[name] = StoredCommand(name, klass, clazz)
+
+                                for (alias in clazz.getAnnotation(Alias::class.java)?.aliases ?: arrayOf()) {
+                                    aliases[alias] = name
+                                }
                             }
                         }
                     }
@@ -34,6 +39,7 @@ class CogManager {
 
     companion object {
         val cogs = mutableMapOf<String, Cog>()
+        val aliases = mutableMapOf<String, String>()
         val commands = mutableMapOf<String, StoredCommand>()
 
         fun help(): List<String> {
