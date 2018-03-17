@@ -2,7 +2,8 @@ package info.eroto.bot
 
 import info.eroto.bot.annotations.Command
 import info.eroto.bot.entities.Cog
-import info.eroto.bot.entities.CommandClass
+import info.eroto.bot.entities.ICommand
+import info.eroto.bot.entities.StoredCommand
 import org.reflections.Reflections
 import org.reflections.util.ClasspathHelper
 import org.reflections.util.ConfigurationBuilder
@@ -15,11 +16,11 @@ class CogManager {
                     if (!it.isInterface) {
                         val klass = it.newInstance() as Cog
 
-                        klass::class.java.methods.forEach { method ->
-                            method.annotations.filterIsInstance<Command>().forEach { ann ->
-                                val name = if (ann.name.isNotBlank()) ann.name else method.name
+                        klass::class.java.classes.filterIsInstance<Class<ICommand>>().forEach { clazz ->
+                            clazz.annotations.filterIsInstance<Command>().forEach { ann ->
+                                val name = if (ann.name.isNotBlank()) ann.name else clazz.simpleName.toLowerCase()
 
-                                commands[name] = CommandClass(name, klass, method)
+                                commands[name] = StoredCommand(name, klass, clazz)
                             }
                         }
                     }
@@ -27,6 +28,6 @@ class CogManager {
     }
 
     companion object {
-        val commands = mutableMapOf<String, CommandClass>()
+        val commands = mutableMapOf<String, StoredCommand>()
     }
 }

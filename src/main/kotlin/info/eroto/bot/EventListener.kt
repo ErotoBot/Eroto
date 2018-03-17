@@ -1,6 +1,6 @@
 package info.eroto.bot
 
-import info.eroto.bot.entities.CommandClass
+import info.eroto.bot.entities.StoredCommand
 import info.eroto.bot.entities.Context
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
@@ -27,7 +27,7 @@ class EventListener : ListenerAdapter() {
             event: MessageReceivedEvent,
             commandName: String,
             splitted: List<String>,
-            baseCommand: CommandClass? = null
+            baseCommand: StoredCommand? = null
     ) {
         val args = splitted.slice(1 until splitted.size)
 
