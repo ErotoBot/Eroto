@@ -1,15 +1,30 @@
 package info.eroto.bot
 
-import info.eroto.bot.entities.Context
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.readValue
+import info.eroto.bot.entities.Config
+import java.io.File
 
 fun main(args: Array<String>) {
-    val cogLoader = CogLoader()
+    val mapper = ObjectMapper(YAMLFactory())
 
-    val testInt = CogLoader.commands["testInt"]!!
-    val testBoolean = CogLoader.commands["testBoolean"]!!
-    val testStringArray = CogLoader.commands["testStringArray"]!!
+    mapper.registerModule(KotlinModule())
 
-    testInt.run(Context(listOf("1")))
-    testBoolean.run(Context(listOf("true")))
-    testStringArray.run(Context(listOf("a,b,c")))
+    val config = if (System.getenv("USE_ENV") != null) {
+        Config(
+                System.getenv("BOT_TOKEN") ?: return println("Token not found!"),
+                System.getenv("BOT_SHARDS")?.toInt() ?: 1,
+                System.getenv("BOT_FIRST_SHARD")?.toInt() ?: 0,
+                System.getenv("BOT_LAST_SHARD")?.toInt() ?: 1,
+                System.getenv("BOT_PREFIXES").split("::")
+        )
+    } else {
+        mapper.readValue(File("config.yml"))
+    }
+
+    val bot = Eroto(config)
+
+    bot.run()
 }

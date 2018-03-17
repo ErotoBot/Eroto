@@ -1,9 +1,24 @@
 package info.eroto.bot.entities
 
+import info.eroto.bot.annotations.Subcommand
 import java.lang.reflect.Method
 
-class CommandClass(private val klass: Any, private val method: Method) {
+class CommandClass(val name: String, private val klass: Any, private val method: Method) {
     private val parameters = method.parameters.slice(1 until method.parameters.size)
+
+    val subcommands = mutableMapOf<String, CommandClass>()
+    val category = klass::class.java.simpleName
+
+    init {
+        klass::class.java.methods.forEach { m ->
+            m.annotations.filterIsInstance<Subcommand>().filter { it.root == name }.forEach { ann ->
+                val name = if (ann.name.isBlank()) m.name else ann.name
+                val cmd = CommandClass(name, klass, m)
+
+                subcommands[name] = cmd
+            }
+        }
+    }
 
     fun run(ctx: Context) {
         val args = mutableListOf<Any>(ctx)

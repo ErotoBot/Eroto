@@ -1,0 +1,7 @@
+token: your token
+shards: 1
+firstShard: 0
+lastShard: 0
+prefixes:
+  - "eroto "
+  - "e!!"

@@ -7,7 +7,7 @@ import org.reflections.Reflections
 import org.reflections.util.ClasspathHelper
 import org.reflections.util.ConfigurationBuilder
 
-class CogLoader {
+class CogManager {
     init {
         Reflections(ConfigurationBuilder().setUrls(ClasspathHelper.forPackage("info.eroto.bot.cogs")))
                 .getSubTypesOf(Cog::class.java)
@@ -19,7 +19,7 @@ class CogLoader {
                             method.annotations.filterIsInstance<Command>().forEach { ann ->
                                 val name = if (ann.name.isNotBlank()) ann.name else method.name
 
-                                commands[name] = CommandClass(klass, method)
+                                commands[name] = CommandClass(name, klass, method)
                             }
                         }
                     }

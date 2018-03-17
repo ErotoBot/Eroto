@@ -36,6 +36,9 @@ dependencies {
     compile 'net.sf.trove4j:trove4j:3.0.3'
     compile 'com.github.mfornos:humanize:1.2.2'
     compile 'com.github.mfornos:humanize-slim:1.2.2'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.0'
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.0'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.0'
 }
 
 compileKotlin {

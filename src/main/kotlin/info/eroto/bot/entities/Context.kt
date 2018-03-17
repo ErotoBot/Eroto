@@ -1,7 +1,9 @@
 package info.eroto.bot.entities
 
-class Context(val args: List<String>) {
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+
+class Context(val event: MessageReceivedEvent, val cmd: CommandClass, val args: List<String>) {
     fun send(vararg args: String) {
-        println(args.joinToString(" "))
+        event.channel.sendMessage(args.joinToString(" ")).queue()
     }
 }
