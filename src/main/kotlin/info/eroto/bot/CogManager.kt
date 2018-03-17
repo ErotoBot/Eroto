@@ -2,15 +2,12 @@ package info.eroto.bot
 
 import info.eroto.bot.annotations.Alias
 import info.eroto.bot.annotations.Command
-import info.eroto.bot.annotations.Description
-import info.eroto.bot.annotations.Subcommand
 import info.eroto.bot.entities.Cog
 import info.eroto.bot.entities.ICommand
 import info.eroto.bot.entities.StoredCommand
 import org.reflections.Reflections
 import org.reflections.util.ClasspathHelper
 import org.reflections.util.ConfigurationBuilder
-import kotlin.reflect.full.findAnnotation
 
 class CogManager {
     init {
