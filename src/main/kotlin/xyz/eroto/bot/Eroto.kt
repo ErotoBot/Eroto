@@ -1,8 +1,8 @@
 package xyz.eroto.bot
 
-import xyz.eroto.bot.entities.Config
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.bot.sharding.ShardManager
+import xyz.eroto.bot.entities.Config
 
 class Eroto(private val config: Config) {
     init {
@@ -12,7 +12,7 @@ class Eroto(private val config: Config) {
     fun run() {
         shardManager = DefaultShardManagerBuilder().apply {
             setToken(config.token)
-            addEventListeners(xyz.eroto.bot.EventListener())
+            addEventListeners(EventListener())
             setAutoReconnect(true)
             setShardsTotal(config.shards)
             setShards(config.firstShard, config.lastShard)
@@ -23,6 +23,6 @@ class Eroto(private val config: Config) {
         lateinit var shardManager: ShardManager
         lateinit var config: Config
 
-        val manager = xyz.eroto.bot.CogManager()
+        val cmdManager = CommandManager()
     }
 }

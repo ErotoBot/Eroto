@@ -1,70 +1,68 @@
 package xyz.eroto.bot
 
-import xyz.eroto.bot.entities.ArgumentTypeException
-import xyz.eroto.bot.entities.StoredCommand
-import xyz.eroto.bot.entities.Context
-import xyz.eroto.bot.entities.MissingArgumentException
-import xyz.eroto.bot.utils.ArgParser
+import me.aurieh.ares.core.entities.EventWaiter
+import me.aurieh.ares.utils.ArgParser
+import net.dv8tion.jda.core.events.Event
+import net.dv8tion.jda.core.events.ReadyEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
+import xyz.eroto.bot.entities.Command
+import xyz.eroto.bot.entities.Context
 
 class EventListener : ListenerAdapter() {
-    override fun onMessageReceived(event: MessageReceivedEvent) {
-        var content = event.message.contentRaw
-        val mentions = listOf(
-                "<@${event.jda.selfUser.id}> ",
-                "<@!${event.jda.selfUser.id}> "
-        )
+    override fun onGenericEvent(event: Event) = waiter.emit(event)
 
-        val usedPrefix = xyz.eroto.bot.Eroto.config.prefixes.firstOrNull { content.startsWith(it) }
+    override fun onReady(event: ReadyEvent) = println("Ready!")
+
+    override fun onMessageReceived(event: MessageReceivedEvent) {
+        if (event.isWebhookMessage)
+            return
+
+        var content = event.message.contentRaw
+        val mentions = listOf("<@${event.jda.selfUser.id}> ", "<@!${event.jda.selfUser.id}> ")
+        val usedPrefix = Eroto.config.prefixes.firstOrNull { content.toLowerCase().startsWith(it.toLowerCase()) }
                 ?: mentions.firstOrNull { content.startsWith(it) }
                 ?: return
+
         content = content.removePrefix(usedPrefix)
-        val splitted = content.split("\\s+".toRegex())
-        val commandName = splitted[0]
+        val splitted = content.split(Regex("\\s+"))
 
-        if (commandName == "help") {
-            val parts = xyz.eroto.bot.CogManager.help()
-
-            event.author.openPrivateChannel().queue { channel ->
-                for (part in parts) {
-                    channel.sendMessage("```asciidoc\n$part```").queue()
-                }
-            }
-        } else {
-            executeCommand(event, commandName, splitted)
-        }
+        executeCommand(event, splitted[0], splitted.slice(1 until splitted.size))
     }
 
     private fun executeCommand(
             event: MessageReceivedEvent,
             commandName: String,
             splitted: List<String>,
-            baseCommand: StoredCommand? = null
+            baseCommand: Command? = null
     ) {
-        val arg = splitted.slice(1 until splitted.size).joinToString(" ")
-        val args = ArgParser.untypedParseSplit(ArgParser.tokenize(arg))
+        val tokenized = ArgParser.tokenize(splitted.joinToString(" "))
+        val args = ArgParser.untypedParseSplit(tokenized)
 
         val cmd = if (baseCommand != null) {
-            baseCommand.subcommands[commandName] ?: return
+            baseCommand.subcommands.firstOrNull { (it.name ?: it::class.simpleName!!).toLowerCase() == commandName.toLowerCase() }
+                    ?: return
         } else {
-            xyz.eroto.bot.CogManager.commands[commandName] ?: xyz.eroto.bot.CogManager.commands[xyz.eroto.bot.CogManager.aliases[commandName]] ?: return
+            CommandManager.commands[commandName]
+                    ?: CommandManager.commands.values.firstOrNull { commandName in it.aliases }
+                    ?: return
         }
 
-        if (args.unmatched.isNotEmpty() && args.unmatched[0] in cmd.subcommands) {
-            return executeCommand(event, args.unmatched[0], arg.split(" "), cmd)
+        if (args.unmatched.isNotEmpty() && cmd.subcommands.any { (it.name ?: it::class.simpleName!!).toLowerCase() == args.unmatched[0].toLowerCase() }) {
+
+            return executeCommand(event, args.unmatched[0], splitted.slice(1 until splitted.size), cmd)
         }
 
         try {
-            val ctx = Context(event, cmd, args)
+            val ctx = Context(event, args)
 
             cmd.run(ctx)
-        } catch(e: Exception) {
-            when (e) {
-                is MissingArgumentException -> event.channel.sendMessage("Missing argument: ${e.arg}").queue()
-                is ArgumentTypeException -> event.channel.sendMessage("Invalid argument type: ${e.input} is not of type ${e.type}")
-                else -> e.printStackTrace()
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
+    }
+
+    companion object {
+        val waiter = EventWaiter()
     }
 }
