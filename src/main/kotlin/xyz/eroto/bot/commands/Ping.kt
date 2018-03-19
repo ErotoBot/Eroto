@@ -1,5 +1,6 @@
 package xyz.eroto.bot.commands
 
+import net.dv8tion.jda.core.entities.Member
 import xyz.eroto.bot.entities.*
 
 class Pang : Subcommand() {
@@ -17,10 +18,13 @@ class Pong : Subcommand() {
 
     init {
         subcommands += Pang()
+        arguments += argument<Member>("member")
     }
 
     override fun run(ctx: Context) {
-        ctx.send("Ping!")
+        val mem = ctx.args["member"] as Member
+
+        ctx.send("Ping! ${mem.asMention}")
     }
 }
 
