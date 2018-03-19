@@ -100,7 +100,7 @@ object ArgParser {
                     continue
                 }
                 if (token.startsWith("--")) {
-                    nextAsValueOf = token.removeRange(0, 2) // TODO replace with drop
+                    nextAsValueOf = token.drop(2)
                 } else {
                     val shorthandKeys = token.toCharArray().map { it.toString() }.toMutableList() // TODO maybe there's a map alternative
                     val lastShorthandValueKey = shorthandKeys.removeAt(shorthandKeys.lastIndex)
