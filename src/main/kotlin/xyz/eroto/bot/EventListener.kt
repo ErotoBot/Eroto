@@ -44,7 +44,7 @@ class EventListener : ListenerAdapter() {
             baseCommand: Command? = null
     ) {
         val tokenized = ArgParser.tokenize(splitted.joinToString(" "))
-        val args = ArgParser.untypedParseSplit(tokenized)
+        val args = ArgParser.parsePosix(tokenized)
 
         val cmd = if (baseCommand != null) {
             baseCommand.subcommands.firstOrNull { (it.name ?: it::class.simpleName!!).toLowerCase() == commandName.toLowerCase() }
@@ -180,7 +180,7 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
                 Array<String>::class -> {
-                    args[name] = userArg.split(Regex("\\s?,\\s?"))
+                    args[name] = userArg.split(Regex("\\s?,\\s?")).toTypedArray()
                     i++
                     next()
                 }

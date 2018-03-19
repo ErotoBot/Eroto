@@ -56,72 +56,74 @@ object ArgParser {
         return tokens
     }
 
-    private fun parseKeyValuePair(pair: String, delimiter: Char = '='): Pair<String, String> {
-        val keyBuilder = StringBuilder()
-        val valueBuilder = StringBuilder()
-        val kvIterator = pair.iterator()
-        var eatingValue = false
-        while (kvIterator.hasNext()) {
-            val character = kvIterator.nextChar()
-            if (!eatingValue && character == delimiter) {
-                eatingValue = true
+    private fun String.splitOnFirst(delimiter: Char): Pair<String, String> {
+        val first = StringBuilder()
+        val second = StringBuilder()
+        var isSecond = false
+
+        for (char in toCharArray()) {
+            if (!isSecond && char == delimiter) {
+                isSecond = true
                 continue
             }
-            if (eatingValue) {
-                valueBuilder.append(character)
+            if (isSecond) {
+                second.append(char)
             } else {
-                keyBuilder.append(character)
+                first.append(char)
             }
         }
-        return keyBuilder.toString() to valueBuilder.toString()
+
+        return first.toString() to second.toString()
     }
 
-    fun untypedParseSplit(tokenList: List<String>): ParsedResult {
+    fun parsePosix(tokens: List<String>): ParsedResult {
         val unmatched = mutableListOf<String>()
         val argMap = mutableMapOf<String, String?>()
-        val tokenIterator = tokenList.iterator()
-        var nextAsValueOf: String? = null
-        while (tokenIterator.hasNext()) {
-            val token = tokenIterator.next()
+        var nextKey: String? = null
+
+        for (token in tokens) {
             if (token.startsWith('-')) {
-                if (nextAsValueOf != null) {
-                    argMap[nextAsValueOf] = null
+                if (nextKey != null) {
+                    argMap[nextKey] = null
+                    nextKey = null
                 }
-                if (token.contains('=')) {
-                    val cut = if (token.startsWith("--")) 2 else 1
-                    val keyValue = token.removeRange(0, cut)
-                    if (keyValue.endsWith('=')) {
-                        nextAsValueOf = keyValue.removeRange(keyValue.length-1, keyValue.length)
+
+                val cut = if (token.startsWith("--")) 2 else 1
+                val kv = token.drop(cut)
+
+                val (k, v) = kv.splitOnFirst('=')
+                if (k.isEmpty()) {
+                    throw EmptyKeyError("empty key while reading \"$token\"", token)
+                }
+
+                if (cut > 1) { // long form
+                    if (v.isEmpty()) {
+                        nextKey = k
                     } else {
-                        val keyValuePair = parseKeyValuePair(keyValue)
-                        argMap[keyValuePair.first] = keyValuePair.second
-                        nextAsValueOf = null
+                        argMap[k] = v
                     }
-                    continue
-                }
-                if (token.startsWith("--")) {
-                    nextAsValueOf = token.drop(2)
-                } else {
-                    val shorthandKeys = token.toCharArray().map { it.toString() }.toMutableList() // TODO maybe there's a map alternative
-                    val lastShorthandValueKey = shorthandKeys.removeAt(shorthandKeys.lastIndex)
-                    nextAsValueOf = lastShorthandValueKey
-                    shorthandKeys.forEach {
-                        argMap[it] = null
+                } else { // short form
+                    val lastK = k.last().toString()
+                    if (v.isEmpty()) {
+                        nextKey = lastK
+                    } else {
+                        argMap[lastK] = v
                     }
+                    val head = k.dropLast(1).map { it.toString() }
+                    head.forEach { argMap[it] = null }
                 }
-                continue
-            } else if (nextAsValueOf != null) {
-                argMap[nextAsValueOf] = token
-                nextAsValueOf = null
-                continue
+            } else if (nextKey != null) {
+                argMap[nextKey] = token
+                nextKey = null
+            } else {
+                unmatched.add(token)
             }
-            unmatched.add(token)
         }
-        if (nextAsValueOf != null) {
-            argMap[nextAsValueOf] = null
-        }
+
         return ParsedResult(unmatched, argMap)
     }
+
+    class EmptyKeyError(msg: String, val token: String) : Exception(msg)
 
     data class ParsedResult(val unmatched: List<String>, val argMap: Map<String, String?>)
 }
