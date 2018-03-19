@@ -16,58 +16,44 @@
 
 package me.aurieh.ares.utils
 
+class UnclosedQuoteError(msg: String) : Exception(msg)
+
 object ArgParser {
     fun tokenize(str: String): List<String> {
-        val tokenList = mutableListOf<String>()
-        val characterIterator = str.iterator()
-        var intermediateStringBuilder = StringBuilder()
-        var eatRest = false
-        var blockEatRest = false
-        var eatingSingleQuotePair = false
-        while (characterIterator.hasNext()) {
-            val character = characterIterator.nextChar()
-            // TODO clean up logic
-            if (eatRest && ((!eatingSingleQuotePair && character == '\'') || (eatingSingleQuotePair && character == '"'))) {
-                // that super rare case where another eatable quote-paired token follows after an unmatched quote
-                intermediateStringBuilder.insert(0, if (character == '\'') '"' else '\'')
-                intermediateStringBuilder.toString().trim().split(" ").forEach {
-                    tokenList.add(it)
+        val tokens = mutableListOf<String>()
+        var escaping = false
+        var quoteChar = ' '
+        var quoting = false
+        var intermediate = StringBuilder()
+        val iter = str.iterator()
+        while (iter.hasNext()) {
+            val char = iter.next()
+            if (escaping) {
+                intermediate.append(char)
+                escaping = false
+            } else if (char == '\\' && !(quoting && quoteChar == '\'')) {
+                escaping = true
+            } else if (quoting && char == quoteChar) {
+                quoting = false
+            } else if (!quoting && (char == '\'' || char == '"')) {
+                quoting = true
+                quoteChar = char
+            } else if (!quoting && char.isWhitespace()) {
+                if (intermediate.isNotEmpty()) {
+                    tokens.add(intermediate.toString())
+                    intermediate = StringBuilder()
                 }
-                intermediateStringBuilder = StringBuilder()
-                eatingSingleQuotePair = character == '\''
-                continue
-            } else if (!blockEatRest && eatRest && ((eatingSingleQuotePair && character == '\'') || (!eatingSingleQuotePair && character == '"'))) {
-                eatRest = false
-                eatingSingleQuotePair = false
-                tokenList.add(intermediateStringBuilder.toString())
-                intermediateStringBuilder = StringBuilder()
-                continue
-            } else if (characterIterator.hasNext() && !blockEatRest && (character == '"' || character == '\'')) {
-                eatRest = true
-                eatingSingleQuotePair = character == '\''
-                continue
-            } else if (!eatRest && character == ' ' && intermediateStringBuilder.isNotEmpty()) {
-                tokenList.add(intermediateStringBuilder.toString())
-                intermediateStringBuilder = StringBuilder()
-                continue
-            } else if (!blockEatRest && character == '\\') {
-                blockEatRest = true
-                continue
-            } else if (!eatRest && character == ' ') continue
-            // FIXME \\"foo bar" transforms into [\foo bar]
-            blockEatRest = false
-            intermediateStringBuilder.append(character)
-        }
-        if (eatRest) {
-            // Unmatched quote at the beginning of the last token
-            intermediateStringBuilder.insert(0, if (eatingSingleQuotePair) '\'' else '"')
-            intermediateStringBuilder.toString().split(" ").forEach {
-                tokenList.add(it)
+            } else {
+                intermediate.append(char)
             }
-        } else if (intermediateStringBuilder.isNotEmpty()) {
-            tokenList.add(intermediateStringBuilder.toString())
         }
-        return tokenList
+        if (quoting) {
+            throw UnclosedQuoteError("unclosed quote")
+        }
+        if (intermediate.isNotEmpty()) {
+            tokens.add(intermediate.toString())
+        }
+        return tokens
     }
 
     private fun parseKeyValuePair(pair: String, delimiter: Char = '='): Pair<String, String> {
