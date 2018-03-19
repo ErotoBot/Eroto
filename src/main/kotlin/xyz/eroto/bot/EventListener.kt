@@ -8,6 +8,8 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 import xyz.eroto.bot.entities.Command
 import xyz.eroto.bot.entities.Context
+import xyz.eroto.bot.entities.exceptions.ArgumentRequiredException
+import xyz.eroto.bot.entities.exceptions.ArgumentTypeException
 
 class EventListener : ListenerAdapter() {
     override fun onGenericEvent(event: Event) = waiter.emit(event)
@@ -15,7 +17,7 @@ class EventListener : ListenerAdapter() {
     override fun onReady(event: ReadyEvent) = println("Ready!")
 
     override fun onMessageReceived(event: MessageReceivedEvent) {
-        if (event.isWebhookMessage)
+        if (event.isWebhookMessage || event.author.isBot)
             return
 
         var content = event.message.contentRaw
@@ -54,11 +56,21 @@ class EventListener : ListenerAdapter() {
         }
 
         try {
-            val ctx = Context(event, args)
+            val ctx = Context(event, args, cmd)
 
             cmd.run(ctx)
         } catch (e: Exception) {
-            e.printStackTrace()
+            when (e) {
+                is ArgumentTypeException -> {
+                    event.channel.sendMessage("Argument ${e.input} is not of type ${e.type.simpleName!!}!").queue()
+                }
+
+                is ArgumentRequiredException -> {
+                    event.channel.sendMessage("Argument ${e.name} is required!").queue()
+                }
+
+                else -> e.printStackTrace()
+            }
         }
     }
 

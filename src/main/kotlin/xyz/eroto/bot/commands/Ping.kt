@@ -1,8 +1,6 @@
 package xyz.eroto.bot.commands
 
-import xyz.eroto.bot.entities.Command
-import xyz.eroto.bot.entities.Context
-import xyz.eroto.bot.entities.Subcommand
+import xyz.eroto.bot.entities.*
 
 class Pang : Subcommand() {
     override val description = "Peng!"
