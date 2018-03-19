@@ -1,4 +1,4 @@
-package info.eroto.bot.entities
+package xyz.eroto.bot.entities
 
 object Converter {
     fun boolean(input: String): Boolean {

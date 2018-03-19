@@ -1,10 +1,10 @@
-package info.eroto.bot
+package xyz.eroto.bot
 
-import info.eroto.bot.entities.ArgumentTypeException
-import info.eroto.bot.entities.StoredCommand
-import info.eroto.bot.entities.Context
-import info.eroto.bot.entities.MissingArgumentException
-import info.eroto.bot.utils.ArgParser
+import xyz.eroto.bot.entities.ArgumentTypeException
+import xyz.eroto.bot.entities.StoredCommand
+import xyz.eroto.bot.entities.Context
+import xyz.eroto.bot.entities.MissingArgumentException
+import xyz.eroto.bot.utils.ArgParser
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 
@@ -16,7 +16,7 @@ class EventListener : ListenerAdapter() {
                 "<@!${event.jda.selfUser.id}> "
         )
 
-        val usedPrefix = Eroto.config.prefixes.firstOrNull { content.startsWith(it) }
+        val usedPrefix = xyz.eroto.bot.Eroto.config.prefixes.firstOrNull { content.startsWith(it) }
                 ?: mentions.firstOrNull { content.startsWith(it) }
                 ?: return
         content = content.removePrefix(usedPrefix)
@@ -24,7 +24,7 @@ class EventListener : ListenerAdapter() {
         val commandName = splitted[0]
 
         if (commandName == "help") {
-            val parts = CogManager.help()
+            val parts = xyz.eroto.bot.CogManager.help()
 
             event.author.openPrivateChannel().queue { channel ->
                 for (part in parts) {
@@ -48,7 +48,7 @@ class EventListener : ListenerAdapter() {
         val cmd = if (baseCommand != null) {
             baseCommand.subcommands[commandName] ?: return
         } else {
-            CogManager.commands[commandName] ?: CogManager.commands[CogManager.aliases[commandName]] ?: return
+            xyz.eroto.bot.CogManager.commands[commandName] ?: xyz.eroto.bot.CogManager.commands[xyz.eroto.bot.CogManager.aliases[commandName]] ?: return
         }
 
         if (args.unmatched.isNotEmpty() && args.unmatched[0] in cmd.subcommands) {

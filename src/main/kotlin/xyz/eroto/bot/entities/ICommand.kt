@@ -1,4 +1,4 @@
-package info.eroto.bot.entities
+package xyz.eroto.bot.entities
 
 interface ICommand {
     fun run(ctx: Context)

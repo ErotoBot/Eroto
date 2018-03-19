@@ -1,10 +1,10 @@
-package info.eroto.bot
+package xyz.eroto.bot
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
-import info.eroto.bot.entities.Config
+import xyz.eroto.bot.entities.Config
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -24,7 +24,7 @@ fun main(args: Array<String>) {
         mapper.readValue(File("config.yml"))
     }
 
-    val bot = Eroto(config)
+    val bot = xyz.eroto.bot.Eroto(config)
 
     bot.run()
 }

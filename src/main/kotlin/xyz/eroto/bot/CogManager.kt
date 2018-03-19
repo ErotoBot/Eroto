@@ -1,10 +1,10 @@
-package info.eroto.bot
+package xyz.eroto.bot
 
-import info.eroto.bot.annotations.Alias
-import info.eroto.bot.annotations.Command
-import info.eroto.bot.entities.Cog
-import info.eroto.bot.entities.ICommand
-import info.eroto.bot.entities.StoredCommand
+import xyz.eroto.bot.annotations.Alias
+import xyz.eroto.bot.annotations.Command
+import xyz.eroto.bot.entities.Cog
+import xyz.eroto.bot.entities.ICommand
+import xyz.eroto.bot.entities.StoredCommand
 import org.reflections.Reflections
 import org.reflections.util.ClasspathHelper
 import org.reflections.util.ConfigurationBuilder

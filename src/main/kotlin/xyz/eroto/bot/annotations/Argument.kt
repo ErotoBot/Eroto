@@ -1,4 +1,4 @@
-package info.eroto.bot.annotations
+package xyz.eroto.bot.annotations
 
 import kotlin.reflect.KClass
 

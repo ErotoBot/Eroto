@@ -1,6 +1,6 @@
-package info.eroto.bot.entities
+package xyz.eroto.bot.entities
 
-import info.eroto.bot.annotations.*
+import xyz.eroto.bot.annotations.*
 
 class StoredCommand(val name: String, val klass: Cog, clazz: Class<ICommand>) {
     val cmd = clazz.newInstance() as ICommand

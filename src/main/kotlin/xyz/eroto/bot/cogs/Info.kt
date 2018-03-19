@@ -1,9 +1,9 @@
-package info.eroto.bot.cogs
+package xyz.eroto.bot.cogs
 
-import info.eroto.bot.annotations.Command
-import info.eroto.bot.entities.Cog
-import info.eroto.bot.entities.Context
-import info.eroto.bot.entities.ICommand
+import xyz.eroto.bot.annotations.Command
+import xyz.eroto.bot.entities.Cog
+import xyz.eroto.bot.entities.Context
+import xyz.eroto.bot.entities.ICommand
 import net.dv8tion.jda.core.EmbedBuilder
 
 class Info : Cog() {
@@ -11,7 +11,7 @@ class Info : Cog() {
     class About : ICommand {
         override fun run(ctx: Context) {
             val eb = EmbedBuilder()
-            eb.setTitle("About me", null)
+            eb.setTitle("About me")
             eb.setDescription("I'm a bot made in Kotlin here to help you out!")
             eb.addField("Source code", "[Click me!](https://github.com/Erotobot/Eroto)", true)
             eb.addField("Developers", "Martmists#3740\nnoud02#0080\nRayintu#0001\nHappynu#5075", true)

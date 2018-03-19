@@ -1,6 +1,6 @@
-package info.eroto.bot.entities
+package xyz.eroto.bot.entities
 
-import info.eroto.bot.utils.ArgParser
+import xyz.eroto.bot.utils.ArgParser
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 

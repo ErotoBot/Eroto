@@ -1,9 +1,9 @@
-package info.eroto.bot.cogs
+package xyz.eroto.bot.cogs
 
-import info.eroto.bot.annotations.*
-import info.eroto.bot.entities.Cog
-import info.eroto.bot.entities.Context
-import info.eroto.bot.entities.ICommand
+import xyz.eroto.bot.annotations.*
+import xyz.eroto.bot.entities.Cog
+import xyz.eroto.bot.entities.Context
+import xyz.eroto.bot.entities.ICommand
 import java.time.temporal.ChronoUnit
 
 class Generic : Cog() {

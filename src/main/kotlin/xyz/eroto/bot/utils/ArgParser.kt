@@ -1,4 +1,4 @@
-package info.eroto.bot.utils
+package xyz.eroto.bot.utils
 
 // credits to aurieh for this :^)
 object ArgParser {

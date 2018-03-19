@@ -1,4 +1,4 @@
-package info.eroto.bot.utils
+package xyz.eroto.bot.utils
 
 import okhttp3.*
 import java.io.IOException
