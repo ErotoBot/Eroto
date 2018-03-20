@@ -1,8 +1,8 @@
 package xyz.eroto.bot.commands
 
-import xyz.eroto.bot.entities.Command
-import xyz.eroto.bot.entities.Context
-import xyz.eroto.bot.entities.argument
+import xyz.eroto.bot.entities.cmd.Command
+import xyz.eroto.bot.entities.cmd.Context
+import xyz.eroto.bot.entities.cmd.argument
 
 class Say : Command() {
     override val description = "Have me say something!"

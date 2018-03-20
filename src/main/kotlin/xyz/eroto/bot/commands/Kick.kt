@@ -2,7 +2,7 @@ package xyz.eroto.bot.commands
 
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
-import xyz.eroto.bot.entities.*
+import xyz.eroto.bot.entities.cmd.*
 
 class Kick : Command() {
     override val description = "Kick a user"

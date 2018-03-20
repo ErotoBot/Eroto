@@ -1,4 +1,4 @@
-package xyz.eroto.bot.entities
+package xyz.eroto.bot.entities.cmd
 
 abstract class Command(val name: String? = null) {
     abstract val description: String

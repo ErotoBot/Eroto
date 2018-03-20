@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import java.io.File
 import xyz.eroto.bot.entities.Config
+import xyz.eroto.bot.entities.PostgresConfig
 
 fun main(args: Array<String>) {
     val mapper = ObjectMapper(YAMLFactory())
@@ -18,7 +19,13 @@ fun main(args: Array<String>) {
                 System.getenv("BOT_PREFIXES").split("::"),
                 System.getenv("BOT_SHARDS")?.toInt() ?: 1,
                 System.getenv("BOT_FIRST_SHARD")?.toInt() ?: 0,
-                System.getenv("BOT_LAST_SHARD")?.toInt() ?: 0
+                System.getenv("BOT_LAST_SHARD")?.toInt() ?: 0,
+                PostgresConfig(
+                        System.getenv("POSTGRES_HOST") ?: "localhost",
+                        System.getenv("POSTGRES_USER") ?: System.getenv("USERNAME") ?: return println("No user configured!"),
+                        System.getenv("POSTGRES_PASSWORD") ?: "",
+                        System.getenv("POSTGRES_DATABASE") ?: "eroto"
+                )
         )
     } else {
         mapper.readValue(File("config.yml"))

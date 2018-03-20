@@ -1,6 +1,7 @@
 package xyz.eroto.bot
 
 import me.aurieh.ares.core.entities.EventWaiter
+import me.aurieh.ares.exposed.async.asyncTransaction
 import me.aurieh.ares.utils.ArgParser
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
@@ -8,9 +9,13 @@ import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.ReadyEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
-import xyz.eroto.bot.entities.Command
-import xyz.eroto.bot.entities.Context
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import xyz.eroto.bot.entities.cmd.Command
+import xyz.eroto.bot.entities.cmd.Context
+import xyz.eroto.bot.entities.db.StoredGuild
 import xyz.eroto.bot.entities.exceptions.*
+import xyz.eroto.bot.entities.schema.GuildsTable
 import xyz.eroto.bot.extensions.searchMembers
 import xyz.eroto.bot.utils.MemberPicker
 import java.util.concurrent.CompletableFuture
@@ -110,14 +115,49 @@ class EventListener : ListenerAdapter() {
             mapOf()
         }
 
-        fut.thenAccept {
-            try {
-                val ctx = Context(event, args, cmd, it)
+        fut.thenAccept { typedArgs ->
+            if (event.guild != null) {
+                asyncTransaction(Eroto.pool) {
+                    val guild = GuildsTable.select { GuildsTable.id.eq(event.guild.idLong) }.firstOrNull()
 
-                cmd.run(ctx)
-            } catch(e: Exception) {
-                e.printStackTrace()
+                    if (guild == null) {
+                        GuildsTable.insert {
+                            it[id] = event.guild.idLong
+                            it[prefixes] = arrayOf()
+                        }
+
+                        val stored = StoredGuild(event.guild.idLong, listOf())
+
+                        runCommand(event, args, cmd, typedArgs, stored)
+                    } else {
+                        val stored = StoredGuild(
+                                event.guild.idLong,
+                                guild[GuildsTable.prefixes].toList()
+                        )
+
+                        runCommand(event, args, cmd, typedArgs, stored)
+                    }
+                }.execute().exceptionally {
+                    it.printStackTrace()
+                }
             }
+
+        }
+    }
+
+    private fun runCommand(
+            event: MessageReceivedEvent,
+            args: ArgParser.ParsedResult,
+            cmd: Command,
+            typedArgs: Map<String, Any>,
+            storedGuild: StoredGuild? = null
+    ) {
+        try {
+            val ctx = Context(event, args, cmd, typedArgs, storedGuild)
+
+            cmd.run(ctx)
+        } catch(e: Exception) {
+            e.printStackTrace()
         }
     }
 

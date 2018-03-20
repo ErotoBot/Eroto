@@ -24,14 +24,22 @@ mainClassName = 'xyz.eroto.bot.MainKt'
 repositories {
     mavenCentral()
     jcenter()
+
+    maven {
+        url = "https://dl.bintray.com/kotlin/exposed"
+    }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.5'
+    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:0.22.5'
+    compile 'org.jetbrains.exposed:exposed:0.10.1'
     compile 'org.slf4j:slf4j-api:1.8.0-beta1'
     compile 'org.slf4j:slf4j-simple:1.8.0-beta1'
     compile 'org.reflections:reflections:0.9.11'
+    compile 'org.postgresql:postgresql:42.2.2'
     compile 'org.json:json:20180130'
     compile 'net.dv8tion:JDA:3.5.1_350'
     compile 'net.sf.trove4j:trove4j:3.0.3'

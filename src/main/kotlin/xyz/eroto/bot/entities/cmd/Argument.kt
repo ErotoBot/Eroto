@@ -1,4 +1,4 @@
-package xyz.eroto.bot.entities
+package xyz.eroto.bot.entities.cmd
 
 import kotlin.reflect.KClass
 

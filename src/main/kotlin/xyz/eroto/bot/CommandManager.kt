@@ -3,8 +3,8 @@ package xyz.eroto.bot
 import org.reflections.Reflections
 import org.reflections.util.ClasspathHelper
 import org.reflections.util.ConfigurationBuilder
-import xyz.eroto.bot.entities.Command
-import xyz.eroto.bot.entities.Subcommand
+import xyz.eroto.bot.entities.cmd.Command
+import xyz.eroto.bot.entities.cmd.Subcommand
 import kotlin.reflect.full.isSubclassOf
 
 class CommandManager {
