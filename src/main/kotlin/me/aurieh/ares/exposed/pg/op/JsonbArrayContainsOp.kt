@@ -17,11 +17,10 @@
 package me.aurieh.ares.exposed.pg.op
 
 import org.jetbrains.exposed.sql.Expression
-import org.jetbrains.exposed.sql.ExpressionWithColumnType
 import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.QueryBuilder
 
-class JsonbArrayContainsOp<T>(private val expr1: ExpressionWithColumnType<Array<T>>, private val expr2: Expression<*>) : Op<Boolean>() {
+class JsonbArrayContainsOp<T>(private val expr1: Expression<Array<T>>, private val expr2: Expression<*>) : Op<Boolean>() {
     override fun toSQL(queryBuilder: QueryBuilder): String {
         // TODO: This is bad
         return "${expr1.toSQL(queryBuilder)}::jsonb ?? ${expr2.toSQL(queryBuilder)}"
