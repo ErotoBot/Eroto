@@ -42,7 +42,7 @@ class Kick : Command() {
         val users = ctx.args["users"] as Array<Member>
         val reason = ctx.args["reason"] as String
         for (user in users) {
-            ctx.guild.controller.kick(user, 7, reason).queue()
+            ctx.guild.controller.kick(user, reason).queue()
         }
     }
 }
