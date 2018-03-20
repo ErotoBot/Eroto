@@ -2,6 +2,7 @@ package xyz.eroto.bot
 
 import me.aurieh.ares.core.entities.EventWaiter
 import me.aurieh.ares.utils.ArgParser
+import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.ReadyEvent
@@ -9,9 +10,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 import xyz.eroto.bot.entities.Command
 import xyz.eroto.bot.entities.Context
-import xyz.eroto.bot.entities.exceptions.ArgumentRequiredException
-import xyz.eroto.bot.entities.exceptions.ArgumentTypeException
-import xyz.eroto.bot.entities.exceptions.MemberNotFoundException
+import xyz.eroto.bot.entities.exceptions.*
 import xyz.eroto.bot.extensions.searchMembers
 import xyz.eroto.bot.utils.MemberPicker
 import java.util.concurrent.CompletableFuture
@@ -60,6 +59,23 @@ class EventListener : ListenerAdapter() {
             return executeCommand(event, args.unmatched[0], splitted.slice(1 until splitted.size), cmd)
         }
 
+        try {
+            checkPermissions(event, cmd)
+            checkBotPermissions(event, cmd)
+        } catch(e: Exception) {
+            return when (e) {
+                is MemberMissingPermissionException -> {
+                    event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
+                }
+
+                is BotMissingPermissionException -> {
+                    event.channel.sendMessage("Bot missing permission: ${e.perm.getName()}").queue()
+                }
+
+                else -> e.printStackTrace()
+            }
+        }
+
         val fut = getTypedArgs(event, cmd, args.unmatched)
 
         fut.exceptionally { e ->
@@ -76,10 +92,18 @@ class EventListener : ListenerAdapter() {
                     event.channel.sendMessage("No members found for ${e.input}!").queue()
                 }
 
+                is MemberMissingPermissionException -> {
+                    event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
+                }
+
+                is BotMissingPermissionException -> {
+                    event.channel.sendMessage("Bot missing permission: ${e.perm.getName()}").queue()
+                }
+
                 else -> e.printStackTrace()
             }
 
-            return@exceptionally mapOf<String, Any>()
+            mapOf()
         }
 
         fut.thenAccept {
@@ -91,6 +115,22 @@ class EventListener : ListenerAdapter() {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun checkPermissions(event: MessageReceivedEvent, cmd: Command) {
+        val missingPerm = cmd.permissions.firstOrNull {
+            !event.member.hasPermission(it.perm) && !event.member.hasPermission(Permission.ADMINISTRATOR)
+        } ?: return
+
+        throw MemberMissingPermissionException(missingPerm.perm)
+    }
+
+    private fun checkBotPermissions(event: MessageReceivedEvent, cmd: Command) {
+        val missingPerm = cmd.permissions.firstOrNull {
+            !event.guild.selfMember.hasPermission(it.perm) && !event.guild.selfMember.hasPermission(Permission.ADMINISTRATOR)
+        } ?: return
+
+        throw BotMissingPermissionException(missingPerm.perm)
     }
 
     private fun getTypedArgs(event: MessageReceivedEvent, cmd: Command, unmatched: List<String>): CompletableFuture<Map<String, Any>> {

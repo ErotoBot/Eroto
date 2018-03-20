@@ -1,5 +1,6 @@
 package xyz.eroto.bot.commands
 
+import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
 import xyz.eroto.bot.entities.*
 
@@ -19,6 +20,8 @@ class Pong : Subcommand() {
     init {
         subcommands += Pang()
         arguments += argument<Member>("member")
+        permissions += MemberPermission(Permission.ADMINISTRATOR)
+        botPermissions += BotPermission(Permission.ADMINISTRATOR)
     }
 
     override fun run(ctx: Context) {

@@ -6,6 +6,8 @@ abstract class Command(val name: String? = null) {
 
     val category = Category.OTHER
     val subcommands = mutableListOf<Subcommand>()
+    val botPermissions = mutableListOf<BotPermission>()
+    val permissions = mutableListOf<MemberPermission>()
     val arguments = mutableListOf<Argument<*>>()
     val aliases = mutableListOf<String>()
 
