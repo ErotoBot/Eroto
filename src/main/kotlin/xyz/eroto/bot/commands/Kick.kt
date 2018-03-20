@@ -6,22 +6,21 @@ import xyz.eroto.bot.entities.cmd.*
 
 class Kick : Command() {
     override val description = "Kick a user"
-    override val example = "kick @user @otherUser spam"
+    override val example = "kick @user spam"
 
     init {
-        arguments += argument<Array<Member>>("users")
-        arguments += argument("reason", defaultValue = "No reason given")
+        arguments += argument<Member>("users")
+        arguments += argument<String>("reason", optional = true)
         permissions += MemberPermission(Permission.KICK_MEMBERS)
         botPermissions += BotPermission(Permission.KICK_MEMBERS)
     }
 
     override fun run(ctx: Context) {
-        val users = ctx.args["users"] as Array<Member>
-        val reason = ctx.args["reason"] as String
-        for (user in users) {
-            if (ctx.member!!.canInteract(user)) {
-                ctx.guild!!.controller.kick(user, reason).queue()
-            }
+        val user = ctx.args["users"] as Member
+        val reason = ctx.args["reason"] as String?
+
+        if (ctx.member!!.canInteract(user)) {
+            ctx.guild!!.controller.kick(user, reason).queue()
         }
     }
 }
