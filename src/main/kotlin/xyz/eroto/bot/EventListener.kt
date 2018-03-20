@@ -140,8 +140,9 @@ class EventListener : ListenerAdapter() {
                 }.execute().exceptionally {
                     it.printStackTrace()
                 }
+            } else {
+                runCommand(event, args, cmd, typedArgs)
             }
-
         }
     }
 
