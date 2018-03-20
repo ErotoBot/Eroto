@@ -198,21 +198,21 @@ class EventListener : ListenerAdapter() {
 
                 // standard arrays
                 Array<Int>::class -> {
-                    args[name] = userArg.split(Regex("\\s?,\\s?")).map {
+                    args[name] = userArg.split(Regex("\\s?${arg.delimiter}\\s?")).map {
                         it.toIntOrNull() ?: throw typeException
                     }.toTypedArray()
                     i++
                     next()
                 }
                 Array<Long>::class -> {
-                    args[name] = userArg.split(Regex("\\s?,\\s?")).map {
+                    args[name] = userArg.split(Regex("\\s?${arg.delimiter}\\s?")).map {
                         it.toLongOrNull() ?: throw typeException
                     }
                     i++
                     next()
                 }
                 Array<Float>::class -> {
-                    args[name] = userArg.split(Regex("\\s?,\\s?")).map {
+                    args[name] = userArg.split(Regex("\\s?${arg.delimiter}\\s?")).map {
                         it.toFloatOrNull() ?: throw typeException
                     }.toTypedArray()
 
@@ -220,12 +220,12 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
                 Array<String>::class -> {
-                    args[name] = userArg.split(Regex("\\s?,\\s?")).toTypedArray()
+                    args[name] = userArg.split(Regex("\\s?${arg.delimiter}\\s?")).toTypedArray()
                     i++
                     next()
                 }
                 Array<Boolean>::class -> {
-                    args[name] = userArg.split(Regex("\\s?,\\s?")).map {
+                    args[name] = userArg.split(Regex("\\s?${arg.delimiter}\\s?")).map {
                         it.toBoolean()
                     }.toTypedArray()
                     i++
