@@ -19,8 +19,8 @@ class Ban : Command() {
         val users = ctx.args["users"] as Array<Member>
         val reason = ctx.args["reason"] as String
         for (user in users) {
-            if (ctx.member.canInteract(user)) {
-                ctx.guild.controller.ban(user, 7, reason).queue()
+            if (ctx.member!!.canInteract(user)) {
+                ctx.guild!!.controller.ban(user, 7, reason).queue()
             }
         }
     }

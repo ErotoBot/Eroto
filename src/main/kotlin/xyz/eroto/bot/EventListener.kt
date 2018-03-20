@@ -59,6 +59,10 @@ class EventListener : ListenerAdapter() {
             return executeCommand(event, args.unmatched[0], splitted.slice(1 until splitted.size), cmd)
         }
 
+        if (cmd.guildOnly && event.guild == null) {
+            return event.channel.sendMessage("This command can only be used in a server!").queue()
+        }
+
         try {
             checkPermissions(event, cmd)
             checkBotPermissions(event, cmd)
