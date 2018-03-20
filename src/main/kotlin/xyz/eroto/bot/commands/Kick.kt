@@ -2,6 +2,7 @@ package xyz.eroto.bot.commands
 
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
+import net.dv8tion.jda.core.exceptions.PermissionException
 import xyz.eroto.bot.entities.cmd.*
 
 class Kick : Command() {
@@ -20,7 +21,17 @@ class Kick : Command() {
         val reason = ctx.args["reason"] as String?
 
         if (ctx.member!!.canInteract(user)) {
-            ctx.guild!!.controller.kick(user, reason).queue()
+            ctx.guild!!.controller.kick(user, reason).queue({
+                ctx.send(":ok_hand:")
+            }) { e ->
+                when (e) {
+                    is PermissionException -> {
+                        ctx.send("Missing permission: ${e.permission.getName()}")
+                    }
+
+                    else -> e.printStackTrace()
+                }
+            }
         }
     }
 }
