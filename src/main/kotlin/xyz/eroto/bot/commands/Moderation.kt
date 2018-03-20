@@ -16,11 +16,11 @@ class Ban : Command() {
     }
 
     override fun run(ctx: Context) {
-        val user_top_role = ctx.member.roles[0]
+        val userTopRole = ctx.member.roles[0]
         val users = ctx.args["users"] as Array<Member>
         val reason = ctx.args["reason"] as String
         for (user in users) {
-            if (user_top_role.position > user.roles[0].position) {
+            if (userTopRole.position > user.roles[0].position) {
                 ctx.guild.controller.ban(user, 7, reason).queue()
             }
         }
@@ -39,10 +39,13 @@ class Kick : Command() {
     }
 
     override fun run(ctx: Context) {
+        val userTopRole = ctx.member.roles[0]
         val users = ctx.args["users"] as Array<Member>
         val reason = ctx.args["reason"] as String
         for (user in users) {
-            ctx.guild.controller.kick(user, reason).queue()
+            if (userTopRole.position > user.roles[0].position) {
+                ctx.guild.controller.kick(user, reason).queue()
+            }
         }
     }
 }
