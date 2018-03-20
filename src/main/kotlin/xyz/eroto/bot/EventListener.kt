@@ -126,7 +126,7 @@ class EventListener : ListenerAdapter() {
     }
 
     private fun checkBotPermissions(event: MessageReceivedEvent, cmd: Command) {
-        val missingPerm = cmd.permissions.firstOrNull {
+        val missingPerm = cmd.botPermissions.firstOrNull {
             !event.guild.selfMember.hasPermission(it.perm) && !event.guild.selfMember.hasPermission(Permission.ADMINISTRATOR)
         } ?: return
 
