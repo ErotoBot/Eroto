@@ -10,7 +10,7 @@ class Kick : Command() {
 
     init {
         arguments += argument<Array<Member>>("users")
-        arguments += argument("reason", optional = true, defaultValue = "No reason given.")
+        arguments += argument<String>("reason", optional = true)
         permissions += MemberPermission(Permission.KICK_MEMBERS)
         botPermissions += BotPermission(Permission.KICK_MEMBERS)
     }
@@ -19,21 +19,18 @@ class Kick : Command() {
         val users = ctx.args["users"] as Array<Member>
         val reason = ctx.args["reason"] as String?
 
-        val unable = mutableListOf<Member>()
+        if (users.any { !ctx.member!!.canInteract(it) || !ctx.guild!!.selfMember!!.canInteract(it) }) {
+            val mems = users.filter {
+                !ctx.member!!.canInteract(it) || !ctx.guild!!.selfMember!!.canInteract(it)
+            }.joinToString(", ") { "${it.user.name}#${it.user.discriminator}" }
+
+            return ctx.send("I can't ban the following users: $mems")
+        }
 
         for (user in users) {
-            if (ctx.member!!.canInteract(user)) {
-                ctx.guild!!.controller.kick(user, reason).queue()
-            } else {
-                unable.add(user)
-            }
+            ctx.guild!!.controller.kick(user, reason)
         }
 
-        if (unable.size > 0) {
-            val userFmt = "Unable to kick:\n" + unable.map { "${it.user.name}#${it.user.discriminator}" }.joinToString("\n")
-            ctx.send(userFmt)
-        } else {
-            ctx.send(":ok_hand:")
-        }
+        ctx.send(":ok_hand:")
     }
 }
