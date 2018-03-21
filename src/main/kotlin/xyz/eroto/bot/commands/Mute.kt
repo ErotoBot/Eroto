@@ -65,7 +65,7 @@ class Mute : Command() {
         }
 
         for (user in users) {
-            ctx.guild!!.controller.addRolesToMember(user, role)
+            ctx.guild!!.controller.addSingleRoleToMember(user, role)
         }
 
         ctx.send(":ok_hand:")
