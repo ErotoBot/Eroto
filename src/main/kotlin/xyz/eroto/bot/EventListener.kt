@@ -5,6 +5,7 @@ import me.aurieh.ares.exposed.async.asyncTransaction
 import me.aurieh.ares.utils.ArgParser
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
+import net.dv8tion.jda.core.entities.Role
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.ReadyEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
@@ -17,7 +18,9 @@ import xyz.eroto.bot.entities.db.StoredGuild
 import xyz.eroto.bot.entities.exceptions.*
 import xyz.eroto.bot.entities.schema.GuildsTable
 import xyz.eroto.bot.extensions.searchMembers
+import xyz.eroto.bot.extensions.searchRole
 import xyz.eroto.bot.utils.MemberPicker
+import xyz.eroto.bot.utils.RolePicker
 import java.util.concurrent.CompletableFuture
 
 class EventListener : ListenerAdapter() {
@@ -40,13 +43,15 @@ class EventListener : ListenerAdapter() {
                     GuildsTable.insert {
                         it[id] = event.guild.idLong
                         it[prefixes] = arrayOf()
+                        it[mutedRole] = ""
                     }
 
-                    StoredGuild(event.guild.idLong, listOf())
+                    StoredGuild(event.guild.idLong, listOf(), "")
                 } else {
                     StoredGuild(
                             event.guild.idLong,
-                            guild[GuildsTable.prefixes].toList()
+                            guild[GuildsTable.prefixes].toList(),
+                            guild[GuildsTable.mutedRole]
                     )
                 }
 
@@ -209,7 +214,7 @@ class EventListener : ListenerAdapter() {
             val typeException = ArgumentTypeException(name, userArg, arg.clazz)
 
             when (arg.clazz) {
-                // standard
+            // standard
                 Int::class -> {
                     args[name] = userArg.toIntOrNull()
                             ?: throw typeException
@@ -239,7 +244,7 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
 
-                // standard arrays
+            // standard arrays
                 Array<Int>::class -> {
                     args[name] = userArg.split(Regex("\\s?${arg.delimiter}\\s?")).map {
                         it.toIntOrNull() ?: throw typeException
@@ -275,8 +280,8 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
 
-                // TODO add more JDA types
-                // jda
+            // TODO add more JDA types
+            // jda
                 Member::class -> {
                     val mems = event.guild!!.searchMembers(userArg)
 
@@ -291,8 +296,6 @@ class EventListener : ListenerAdapter() {
                             val futt = MemberPicker(event.member!!, mems).build(event.message)
 
                             futt.exceptionally {
-
-
                                 null
                             }
 
@@ -307,7 +310,34 @@ class EventListener : ListenerAdapter() {
                     }
                 }
 
-                // jda Arrays
+                Role::class -> {
+                    val roles = event.guild!!.searchRole(userArg)
+                    when {
+                        roles.size == 1 -> {
+                            args[name] = roles.first()
+                            i++
+                            next()
+                        }
+
+                        roles.size > 1 -> {
+                            val futt = RolePicker(event.member!!, roles).build(event.message)
+
+                            futt.exceptionally {
+                                null
+                            }
+
+                            futt.thenAccept {
+                                args[name] = it
+                                i++
+                                next()
+                            }
+                        }
+
+                        else -> throw MemberNotFoundException(userArg)
+                    }
+                }
+
+            // jda Arrays
                 Array<Member>::class -> {
                     val members = mutableListOf<Member>()
                     val memArgs = userArg.split(Regex("\\s?${arg.delimiter}\\s?"))
