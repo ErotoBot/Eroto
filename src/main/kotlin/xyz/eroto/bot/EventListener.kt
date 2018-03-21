@@ -55,7 +55,7 @@ class EventListener : ListenerAdapter() {
                         ?: stored.prefixes.firstOrNull { content.toLowerCase().startsWith(it.toLowerCase()) }
                         ?: return@asyncTransaction
 
-                val splitted = content.removePrefix(usedPrefix).split(Regex("\\s+"))
+                val splitted = ArgParser.tokenize(content.removePrefix(usedPrefix))
 
                 executeCommand(event, splitted[0], splitted.slice(1 until splitted.size), stored)
             }.execute().exceptionally {
@@ -66,7 +66,7 @@ class EventListener : ListenerAdapter() {
                     ?: mentions.firstOrNull { content.startsWith(it) }
                     ?: return
 
-            val splitted = content.removePrefix(usedPrefix).split(Regex("\\s+"))
+            val splitted = ArgParser.tokenize(content.removePrefix(usedPrefix))
 
             executeCommand(event, splitted[0], splitted.slice(1 until splitted.size))
         }
@@ -79,8 +79,7 @@ class EventListener : ListenerAdapter() {
             storedGuild: StoredGuild? = null,
             baseCommand: Command? = null
     ) {
-        val tokenized = ArgParser.tokenize(splitted.joinToString(" "))
-        val args = ArgParser.parsePosix(tokenized)
+        val args = ArgParser.parsePosix(splitted)
 
         val cmd = if (baseCommand != null) {
             baseCommand.subcommands.firstOrNull { (it.name ?: it::class.simpleName!!).toLowerCase() == commandName.toLowerCase() }
