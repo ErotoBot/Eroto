@@ -296,6 +296,29 @@ class EventListener : ListenerAdapter() {
                         else -> throw MemberNotFoundException(userArg)
                     }
                 }
+
+                // jda Arrays
+                Array<Member>::class -> {
+                    val members = MutableList<Member>()
+                    userArg.split(Regex("\\s?${arg.delimiter}\\s?")).forEach {
+                        val mems = event.guild!!.searchMembers(it)
+
+                        when {
+                            mems.size == 1 -> {
+                                members.add(mems.first())
+                                i++
+                                next()
+                            }
+                            mems.size > 1 -> MemberPicker(event.member!!, mems).build(event.message).thenAccept {
+                                members.add(it)
+                                i++
+                                next()
+                            }
+                            else -> throw MemberNotFoundException(it)
+                        }
+                    }
+                    args[name] = members.toTypedArray()
+                }
             }
         }
 

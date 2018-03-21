@@ -10,28 +10,22 @@ class Kick : Command() {
     override val example = "kick @user spam"
 
     init {
-        arguments += argument<Member>("users")
-        arguments += argument<String>("reason", optional = true)
+        arguments += argument<Array<Member>>("users")
+        arguments += argument("reason", optional = true, defaultValue = "No reason given.")
         permissions += MemberPermission(Permission.KICK_MEMBERS)
         botPermissions += BotPermission(Permission.KICK_MEMBERS)
     }
 
     override fun run(ctx: Context) {
-        val user = ctx.args["users"] as Member
+        val users = ctx.args["users"] as Array<Member>
         val reason = ctx.args["reason"] as String?
 
-        if (ctx.member!!.canInteract(user)) {
-            ctx.guild!!.controller.kick(user, reason).queue({
-                ctx.send(":ok_hand:")
-            }) { e ->
-                when (e) {
-                    is PermissionException -> {
-                        ctx.send("Missing permission: ${e.permission.getName()}")
-                    }
-
-                    else -> e.printStackTrace()
-                }
+        for (user in users) {
+            if (ctx.member!!.canInteract(user)) {
+                ctx.guild!!.controller.kick(user, reason).queue()
             }
         }
+
+        ctx.send(":ok_hand:")
     }
 }
