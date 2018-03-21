@@ -24,7 +24,7 @@ class Kick : Command() {
                 !ctx.member!!.canInteract(it) || !ctx.guild!!.selfMember!!.canInteract(it)
             }.joinToString(", ") { "${it.user.name}#${it.user.discriminator}" }
 
-            return ctx.send("I can't ban the following users: $mems")
+            return ctx.send("I can't kick the following users: $mems")
         }
 
         for (user in users) {
