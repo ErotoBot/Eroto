@@ -29,22 +29,54 @@ class EventListener : ListenerAdapter() {
         if (event.isWebhookMessage || event.author.isBot)
             return
 
-        var content = event.message.contentRaw
+        val content = event.message.contentRaw
         val mentions = listOf("<@${event.jda.selfUser.id}> ", "<@!${event.jda.selfUser.id}> ")
-        val usedPrefix = Eroto.config.prefixes.firstOrNull { content.toLowerCase().startsWith(it.toLowerCase()) }
-                ?: mentions.firstOrNull { content.startsWith(it) }
-                ?: return
 
-        content = content.removePrefix(usedPrefix)
-        val splitted = content.split(Regex("\\s+"))
+        if (event.guild != null) {
+            asyncTransaction(Eroto.pool) {
+                val guild = GuildsTable.select { GuildsTable.id.eq(event.guild.idLong) }.firstOrNull()
 
-        executeCommand(event, splitted[0], splitted.slice(1 until splitted.size))
+                val stored = if (guild == null) {
+                    GuildsTable.insert {
+                        it[id] = event.guild.idLong
+                        it[prefixes] = arrayOf()
+                    }
+
+                    StoredGuild(event.guild.idLong, listOf())
+                } else {
+                    StoredGuild(
+                            event.guild.idLong,
+                            guild[GuildsTable.prefixes].toList()
+                    )
+                }
+
+                val usedPrefix = Eroto.config.prefixes.firstOrNull { content.toLowerCase().startsWith(it.toLowerCase()) }
+                        ?: mentions.firstOrNull { content.startsWith(it) }
+                        ?: stored.prefixes.firstOrNull { content.toLowerCase().startsWith(it.toLowerCase()) }
+                        ?: return@asyncTransaction
+
+                val splitted = content.removePrefix(usedPrefix).split(Regex("\\s+"))
+
+                executeCommand(event, splitted[0], splitted.slice(1 until splitted.size), stored)
+            }.execute().exceptionally {
+                it.printStackTrace()
+            }
+        } else {
+            val usedPrefix = Eroto.config.prefixes.firstOrNull { content.toLowerCase().startsWith(it.toLowerCase()) }
+                    ?: mentions.firstOrNull { content.startsWith(it) }
+                    ?: return
+
+            val splitted = content.removePrefix(usedPrefix).split(Regex("\\s+"))
+
+            executeCommand(event, splitted[0], splitted.slice(1 until splitted.size))
+        }
     }
 
     private fun executeCommand(
             event: MessageReceivedEvent,
             commandName: String,
             splitted: List<String>,
+            storedGuild: StoredGuild? = null,
             baseCommand: Command? = null
     ) {
         val tokenized = ArgParser.tokenize(splitted.joinToString(" "))
@@ -61,7 +93,7 @@ class EventListener : ListenerAdapter() {
 
         if (args.unmatched.isNotEmpty() && cmd.subcommands.any { (it.name ?: it::class.simpleName!!).toLowerCase() == args.unmatched[0].toLowerCase() }) {
 
-            return executeCommand(event, args.unmatched[0], splitted.slice(1 until splitted.size), cmd)
+            return executeCommand(event, args.unmatched[0], splitted.slice(1 until splitted.size), storedGuild, cmd)
         }
 
         if (cmd.guildOnly && event.guild == null) {
@@ -112,53 +144,17 @@ class EventListener : ListenerAdapter() {
                 else -> e.printStackTrace()
             }
 
-            mapOf()
+            null
         }
 
         fut.thenAccept { typedArgs ->
-            if (event.guild != null) {
-                asyncTransaction(Eroto.pool) {
-                    val guild = GuildsTable.select { GuildsTable.id.eq(event.guild.idLong) }.firstOrNull()
+            try {
+                val ctx = Context(event, args, cmd, typedArgs, storedGuild)
 
-                    if (guild == null) {
-                        GuildsTable.insert {
-                            it[id] = event.guild.idLong
-                            it[prefixes] = arrayOf()
-                        }
-
-                        val stored = StoredGuild(event.guild.idLong, listOf())
-
-                        runCommand(event, args, cmd, typedArgs, stored)
-                    } else {
-                        val stored = StoredGuild(
-                                event.guild.idLong,
-                                guild[GuildsTable.prefixes].toList()
-                        )
-
-                        runCommand(event, args, cmd, typedArgs, stored)
-                    }
-                }.execute().exceptionally {
-                    it.printStackTrace()
-                }
-            } else {
-                runCommand(event, args, cmd, typedArgs)
+                cmd.run(ctx)
+            } catch(e: Exception) {
+                e.printStackTrace()
             }
-        }
-    }
-
-    private fun runCommand(
-            event: MessageReceivedEvent,
-            args: ArgParser.ParsedResult,
-            cmd: Command,
-            typedArgs: Map<String, Any>,
-            storedGuild: StoredGuild? = null
-    ) {
-        try {
-            val ctx = Context(event, args, cmd, typedArgs, storedGuild)
-
-            cmd.run(ctx)
-        } catch(e: Exception) {
-            e.printStackTrace()
         }
     }
 
@@ -288,11 +284,23 @@ class EventListener : ListenerAdapter() {
                             i++
                             next()
                         }
-                        mems.size > 1 -> MemberPicker(event.member!!, mems).build(event.message).thenAccept {
-                            args[name] = it
-                            i++
-                            next()
+
+                        mems.size > 1 -> {
+                            val futt = MemberPicker(event.member!!, mems).build(event.message)
+
+                            futt.exceptionally {
+
+
+                                null
+                            }
+
+                            futt.thenAccept {
+                                args[name] = it
+                                i++
+                                next()
+                            }
                         }
+
                         else -> throw MemberNotFoundException(userArg)
                     }
                 }
@@ -300,24 +308,51 @@ class EventListener : ListenerAdapter() {
                 // jda Arrays
                 Array<Member>::class -> {
                     val members = mutableListOf<Member>()
-                    userArg.split(Regex("\\s?${arg.delimiter}\\s?")).forEach {
-                        val mems = event.guild!!.searchMembers(it)
+                    val memArgs = userArg.split(Regex("\\s?${arg.delimiter}\\s?"))
+                    val futt = CompletableFuture<List<Member>>()
+                    var ii = 0
+
+                    fun nextMem() {
+                        if (ii == memArgs.size) {
+                            futt.complete(members)
+                            return
+                        }
+
+                        val memArg = memArgs[ii]
+                        val mems = event.guild.searchMembers(memArg)
 
                         when {
+                            mems.size > 1 -> {
+                                MemberPicker(event.member, mems).build(event.message).thenAccept {
+                                    members += it
+                                    ii++
+                                    nextMem()
+                                }
+                            }
+
                             mems.size == 1 -> {
-                                members.add(mems.first())
-                                i++
-                                next()
+                                members += mems[0]
+                                ii++
+                                nextMem()
                             }
-                            mems.size > 1 -> MemberPicker(event.member!!, mems).build(event.message).thenAccept {
-                                members.add(it)
-                                i++
-                                next()
-                            }
-                            else -> throw MemberNotFoundException(it)
+
+                            else -> throw MemberNotFoundException(memArg)
                         }
                     }
-                    args[name] = members.toTypedArray()
+
+                    nextMem()
+
+                    futt.thenAccept {
+                        args[name] = members.toTypedArray()
+                        i++
+                        next()
+                    }
+
+                    futt.exceptionally {
+                        fut.completeExceptionally(it)
+
+                        null
+                    }
                 }
             }
         }
