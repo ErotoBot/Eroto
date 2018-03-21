@@ -29,7 +29,7 @@ class SetRole : Subcommand(){
             xyz.eroto.bot.entities.schema.GuildsTable.update({
                 GuildsTable.id.eq(ctx.guild!!.idLong)
             }) {
-                it[mutedRole] = role.id
+                it[mutedRole] = role.idLong
             }
 
             ctx.send(":ok_hand:")
@@ -54,7 +54,7 @@ class Mute : Command() {
 
     override fun run(ctx: Context) {
         val users = ctx.args["users"] as Array<Member>
-        val role = ctx.guild!!.roles.filter { it.id == ctx.storedGuild!!.mutedRole }.firstOrNull() ?: return ctx.send("Please set a role first using `eroto mute setrole`!")
+        val role = ctx.guild!!.roles.firstOrNull { it.idLong == ctx.storedGuild!!.mutedRole } ?: return ctx.send("Please set a role first using `eroto mute setrole`!")
 
         if (users.any { !ctx.member!!.canInteract(it) || !ctx.guild!!.selfMember!!.canInteract(it) }) {
             val mems = users.filter {

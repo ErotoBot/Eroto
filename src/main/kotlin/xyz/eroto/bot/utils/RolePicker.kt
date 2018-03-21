@@ -90,8 +90,8 @@ class RolePicker(
         return fut
     }
 
-    private fun buildInput(channel: MessageChannel): CompletableFuture<Member> {
-        val fut = CompletableFuture<Member>()
+    private fun buildInput(channel: MessageChannel): CompletableFuture<Role> {
+        val fut = CompletableFuture<Role>()
 
         channel.sendMessage(inputText).queue({ msg ->
             waiter.await<MessageReceivedEvent>(1, timeout) {

@@ -7,5 +7,5 @@ fun Guild.searchMembers(query: String) = members.filter {
 }
 
 fun Guild.searchRole(query: String) = roles.filter {
-    query in "<@&${it.id}> ${it.asMention} ${it.name} @${it.name} ${it.id}"
+    query in "${it.asMention} ${it.name} @${it.name} ${it.id}"
 }

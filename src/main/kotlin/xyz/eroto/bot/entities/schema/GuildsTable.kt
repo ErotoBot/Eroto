@@ -6,5 +6,5 @@ import org.jetbrains.exposed.sql.Table
 object GuildsTable : Table() {
     val id = long("id")
     val prefixes = pgArray<String>("prefixes", "VARCHAR")
-    val mutedRole = text("mutedRole")
+    val mutedRole = long("mutedRole").nullable()
 }

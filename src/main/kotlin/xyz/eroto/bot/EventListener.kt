@@ -43,10 +43,10 @@ class EventListener : ListenerAdapter() {
                     GuildsTable.insert {
                         it[id] = event.guild.idLong
                         it[prefixes] = arrayOf()
-                        it[mutedRole] = ""
+                        it[mutedRole] = null
                     }
 
-                    StoredGuild(event.guild.idLong, listOf(), "")
+                    StoredGuild(event.guild.idLong, listOf(), null)
                 } else {
                     StoredGuild(
                             event.guild.idLong,
@@ -214,7 +214,7 @@ class EventListener : ListenerAdapter() {
             val typeException = ArgumentTypeException(name, userArg, arg.clazz)
 
             when (arg.clazz) {
-            // standard
+                // standard
                 Int::class -> {
                     args[name] = userArg.toIntOrNull()
                             ?: throw typeException
@@ -244,7 +244,7 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
 
-            // standard arrays
+                // standard arrays
                 Array<Int>::class -> {
                     args[name] = userArg.split(Regex("\\s?${arg.delimiter}\\s?")).map {
                         it.toIntOrNull() ?: throw typeException
@@ -280,8 +280,8 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
 
-            // TODO add more JDA types
-            // jda
+                // TODO add more JDA types
+                // jda
                 Member::class -> {
                     val mems = event.guild!!.searchMembers(userArg)
 
@@ -337,7 +337,7 @@ class EventListener : ListenerAdapter() {
                     }
                 }
 
-            // jda Arrays
+                // jda Arrays
                 Array<Member>::class -> {
                     val members = mutableListOf<Member>()
                     val memArgs = userArg.split(Regex("\\s?${arg.delimiter}\\s?"))
