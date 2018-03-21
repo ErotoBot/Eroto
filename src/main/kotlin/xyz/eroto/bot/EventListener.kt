@@ -191,8 +191,11 @@ class EventListener : ListenerAdapter() {
             if (i == unmatched.size) {
                 if (arg.defaultValue != null) {
                     args[name] = arg.defaultValue
+                    fut.complete(args)
                 } else if (!arg.optional) {
                     throw ArgumentRequiredException(name)
+                } else {
+                    fut.complete(args)
                 }
 
                 return
