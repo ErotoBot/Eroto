@@ -56,7 +56,7 @@ class Mute : Command() {
         val users = ctx.args["users"] as Array<Member>
         val role = ctx.guild!!.roles.filter { it.id == ctx.storedGuild!!.mutedRole }.firstOrNull()
 
-        if (role == ""){
+        if (role == null){
             return ctx.send("Please set a role first using `eroto mute setrole`!")
         }
 
