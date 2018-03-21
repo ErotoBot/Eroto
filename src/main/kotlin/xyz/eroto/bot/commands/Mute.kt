@@ -54,11 +54,7 @@ class Mute : Command() {
 
     override fun run(ctx: Context) {
         val users = ctx.args["users"] as Array<Member>
-        val role = ctx.guild!!.roles.filter { it.id == ctx.storedGuild!!.mutedRole }.firstOrNull()
-
-        if (role == null){
-            return ctx.send("Please set a role first using `eroto mute setrole`!")
-        }
+        val role = ctx.guild!!.roles.filter { it.id == ctx.storedGuild!!.mutedRole }.firstOrNull() ?: return ctx.send("Please set a role first using `eroto mute setrole`!")
 
         if (users.any { !ctx.member!!.canInteract(it) || !ctx.guild!!.selfMember!!.canInteract(it) }) {
             val mems = users.filter {
