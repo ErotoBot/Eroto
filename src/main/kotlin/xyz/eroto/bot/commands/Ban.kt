@@ -20,12 +20,21 @@ class Ban : Command() {
         val users = ctx.args["users"] as Array<Member>
         val reason = ctx.args["reason"] as String?
 
+        val unable = mutableListOf<Member>()
+
         for (user in users) {
             if (ctx.member!!.canInteract(user)) {
                 ctx.guild!!.controller.ban(user, 7, reason).queue()
+            } else {
+                unable.add(user)
             }
         }
 
-        ctx.send(":ok_hand:")
+        if (unable.size > 0){
+            val userFmt = "Unable to ban:\n" + unable.map { "${it.user.name}#${it.user.discriminator}" }.joinToString("\n")
+            ctx.send(userFmt)
+        } else {
+            ctx.send(":ok_hand:")
+        }
+
     }
-}

@@ -299,7 +299,7 @@ class EventListener : ListenerAdapter() {
 
                 // jda Arrays
                 Array<Member>::class -> {
-                    val members = MutableList<Member>()
+                    val members = mutableListOf<Member>()
                     userArg.split(Regex("\\s?${arg.delimiter}\\s?")).forEach {
                         val mems = event.guild!!.searchMembers(it)
 
