@@ -137,6 +137,10 @@ class EventListener : ListenerAdapter() {
                     event.channel.sendMessage("No members found for ${e.input}!").queue()
                 }
 
+                is RoleNotFoundException -> {
+                    event.channel.sendMessage("No roles found for ${e.input}!").queue()
+                }
+
                 is MemberMissingPermissionException -> {
                     event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
                 }
