@@ -41,6 +41,7 @@ class MemberPicker(
 
     fun build(channel: MessageChannel)
             = if (user.guild.selfMember.hasPermission(Permission.MESSAGE_ADD_REACTION)
+            && user.guild.selfMember.hasPermission(Permission.MESSAGE_MANAGE)
             || user.guild.selfMember.hasPermission(Permission.ADMINISTRATOR)) buildReactions(channel) else buildInput(channel)
 
     private fun buildReactions(channel: MessageChannel): CompletableFuture<Member> {

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.fasterxml.jackson.module.kotlin.readValue
+import xyz.eroto.bot.entities.APIConfig
 import java.io.File
 import xyz.eroto.bot.entities.Config
 import xyz.eroto.bot.entities.PostgresConfig
@@ -25,6 +26,9 @@ fun main(args: Array<String>) {
                         System.getenv("POSTGRES_USER") ?: System.getenv("USERNAME") ?: return println("No user configured!"),
                         System.getenv("POSTGRES_PASSWORD") ?: "",
                         System.getenv("POSTGRES_DATABASE") ?: "eroto"
+                ),
+                APIConfig(
+                        System.getenv("WEEBSH_TOKEN") ?: return println("No weebsh token given!")
                 )
         )
     } else {

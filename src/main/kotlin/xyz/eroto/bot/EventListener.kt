@@ -137,6 +137,10 @@ class EventListener : ListenerAdapter() {
                     event.channel.sendMessage("No members found for ${e.input}!").queue()
                 }
 
+                is RoleNotFoundException -> {
+                    event.channel.sendMessage("No roles found for ${e.input}!").queue()
+                }
+
                 is MemberMissingPermissionException -> {
                     event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
                 }
@@ -280,7 +284,7 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
 
-                // TODO add more JDA types
+                // TODO add more JDA variant
                 // jda
                 Member::class -> {
                     val mems = event.guild!!.searchMembers(userArg)
@@ -296,6 +300,7 @@ class EventListener : ListenerAdapter() {
                             val futt = MemberPicker(event.member!!, mems).build(event.message)
 
                             futt.exceptionally {
+                                fut.completeExceptionally(it)
                                 null
                             }
 
@@ -323,6 +328,7 @@ class EventListener : ListenerAdapter() {
                             val futt = RolePicker(event.member!!, roles).build(event.message)
 
                             futt.exceptionally {
+                                fut.completeExceptionally(it)
                                 null
                             }
 
@@ -333,7 +339,7 @@ class EventListener : ListenerAdapter() {
                             }
                         }
 
-                        else -> throw MemberNotFoundException(userArg)
+                        else -> throw RoleNotFoundException(userArg)
                     }
                 }
 
