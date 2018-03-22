@@ -5,6 +5,7 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import xyz.eroto.bot.entities.db.StoredGuild
 
@@ -30,5 +31,12 @@ class Context(
     fun send(content: String, success: (Message) -> Unit)
             = event.channel.sendMessage(content).queue(success)
     fun send(content: String, success: (Message) -> Unit, fail: (Throwable) -> Unit)
+            = event.channel.sendMessage(content).queue(success, fail)
+
+    fun send(content: MessageEmbed)
+            = event.channel.sendMessage(content).queue()
+    fun send(content: MessageEmbed, success: (Message) -> Unit)
+            = event.channel.sendMessage(content).queue(success)
+    fun send(content: MessageEmbed, success: (Message) -> Unit, fail: (Throwable) -> Unit)
             = event.channel.sendMessage(content).queue(success, fail)
 }

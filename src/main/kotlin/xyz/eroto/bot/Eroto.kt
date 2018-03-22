@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import xyz.eroto.bot.entities.Config
 import xyz.eroto.bot.entities.CoroutineDispatcher
 import xyz.eroto.bot.entities.schema.GuildsTable
+import xyz.eroto.bot.utils.Wolk
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -42,6 +43,7 @@ class Eroto(private val config: Config) {
         lateinit var config: Config
 
         val cmdManager = CommandManager()
+        val wolk = Wolk()
 
         val pool: ExecutorService by lazy {
             Executors.newCachedThreadPool {

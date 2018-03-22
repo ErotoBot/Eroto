@@ -12,7 +12,8 @@ class CommandManager {
         Reflections(ConfigurationBuilder().addUrls(ClasspathHelper.forPackage("xyz.eroto.bot.commands")))
                 .getSubTypesOf(Command::class.java)
                 .forEach {
-                    if (!it.kotlin.isSubclassOf(Subcommand::class)) {
+                    if (!it.isInterface && !it.kotlin.isSubclassOf(Subcommand::class) && !it.kotlin.isAbstract) {
+                        println(it.name)
                         val cmd = it.newInstance() as Command
                         val name = cmd.name?.toLowerCase() ?: it.simpleName.toLowerCase()
 

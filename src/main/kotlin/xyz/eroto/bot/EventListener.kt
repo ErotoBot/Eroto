@@ -284,7 +284,7 @@ class EventListener : ListenerAdapter() {
                     next()
                 }
 
-                // TODO add more JDA types
+                // TODO add more JDA variant
                 // jda
                 Member::class -> {
                     val mems = event.guild!!.searchMembers(userArg)
