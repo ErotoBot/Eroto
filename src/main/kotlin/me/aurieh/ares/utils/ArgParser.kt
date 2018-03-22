@@ -96,10 +96,6 @@ object ArgParser {
                     throw EmptyKeyError("empty key while reading \"$token\"", token)
                 }
 
-                if (k.startsWith("-")) {
-                    continue
-                }
-
                 if (cut > 1) { // long form
                     argMap[k] = if (v.isEmpty()) null else v
                 } else { // short form

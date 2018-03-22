@@ -3,6 +3,7 @@ package xyz.eroto.bot
 import me.aurieh.ares.core.entities.EventWaiter
 import me.aurieh.ares.exposed.async.asyncTransaction
 import me.aurieh.ares.utils.ArgParser
+import me.aurieh.ares.utils.UnclosedQuoteError
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.Role
@@ -60,9 +61,10 @@ class EventListener : ListenerAdapter() {
                         ?: stored.prefixes.firstOrNull { content.toLowerCase().startsWith(it.toLowerCase()) }
                         ?: return@asyncTransaction
 
-                val splitted = ArgParser.tokenize(content.removePrefix(usedPrefix))
+                val prefixLess = content.removePrefix(usedPrefix)
+                val cmd = prefixLess.split(" ")[0]
 
-                executeCommand(event, splitted[0], splitted.slice(1 until splitted.size), stored)
+                executeCommand(event, cmd, prefixLess.removePrefix(cmd).trim(), stored)
             }.execute().exceptionally {
                 it.printStackTrace()
             }
@@ -71,98 +73,112 @@ class EventListener : ListenerAdapter() {
                     ?: mentions.firstOrNull { content.startsWith(it) }
                     ?: return
 
-            val splitted = ArgParser.tokenize(content.removePrefix(usedPrefix))
+            val prefixLess = content.removePrefix(usedPrefix)
+            val cmd = prefixLess.split(" ")[0]
 
-            executeCommand(event, splitted[0], splitted.slice(1 until splitted.size))
+            executeCommand(event, cmd, prefixLess.removePrefix(cmd).trim())
         }
     }
 
     private fun executeCommand(
             event: MessageReceivedEvent,
             commandName: String,
-            splitted: List<String>,
+            content: String,
             storedGuild: StoredGuild? = null,
             baseCommand: Command? = null
     ) {
-        val args = ArgParser.parsePosix(splitted)
-
-        val cmd = if (baseCommand != null) {
-            baseCommand.subcommands.firstOrNull { (it.name ?: it::class.simpleName!!).toLowerCase() == commandName.toLowerCase() }
-                    ?: return
-        } else {
-            CommandManager.commands[commandName]
-                    ?: CommandManager.commands.values.firstOrNull { commandName in it.aliases }
-                    ?: return
-        }
-
-        if (args.unmatched.isNotEmpty() && cmd.subcommands.any { (it.name ?: it::class.simpleName!!).toLowerCase() == args.unmatched[0].toLowerCase() }) {
-
-            return executeCommand(event, args.unmatched[0], splitted.slice(1 until splitted.size), storedGuild, cmd)
-        }
-
-        if (cmd.guildOnly && event.guild == null) {
-            return event.channel.sendMessage("This command can only be used in a server!").queue()
-        }
-
         try {
-            checkPermissions(event, cmd)
-            checkBotPermissions(event, cmd)
-        } catch(e: Exception) {
-            return when (e) {
-                is MemberMissingPermissionException -> {
-                    event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
+            val cmd = if (baseCommand != null) {
+                baseCommand.subcommands.firstOrNull {
+                    (it.name ?: it::class.simpleName!!).toLowerCase() == commandName.toLowerCase()
                 }
-
-                is BotMissingPermissionException -> {
-                    event.channel.sendMessage("Bot missing permission: ${e.perm.getName()}").queue()
-                }
-
-                else -> e.printStackTrace()
-            }
-        }
-
-        val fut = getTypedArgs(event, cmd, args.unmatched)
-
-        fut.exceptionally { e ->
-            when (e) {
-                is ArgumentTypeException -> {
-                    event.channel.sendMessage("Argument ${e.input} is not of type ${e.type.simpleName!!}!").queue()
-                }
-
-                is ArgumentRequiredException -> {
-                    event.channel.sendMessage("Argument ${e.name} is required!").queue()
-                }
-
-                is MemberNotFoundException -> {
-                    event.channel.sendMessage("No members found for ${e.input}!").queue()
-                }
-
-                is RoleNotFoundException -> {
-                    event.channel.sendMessage("No roles found for ${e.input}!").queue()
-                }
-
-                is MemberMissingPermissionException -> {
-                    event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
-                }
-
-                is BotMissingPermissionException -> {
-                    event.channel.sendMessage("Bot missing permission: ${e.perm.getName()}").queue()
-                }
-
-                else -> e.printStackTrace()
+                        ?: return
+            } else {
+                CommandManager.commands[commandName]
+                        ?: CommandManager.commands.values.firstOrNull { commandName in it.aliases }
+                        ?: return
             }
 
-            null
-        }
+            val tokenized = ArgParser.tokenize(content)
+            val args = ArgParser.parsePosix(tokenized)
 
-        fut.thenAccept { typedArgs ->
+            if (args.unmatched.isNotEmpty() && cmd.subcommands.any {
+                        (it.name ?: it::class.simpleName!!).toLowerCase() == args.unmatched[0].toLowerCase()
+                    }) {
+
+                return executeCommand(event, args.unmatched[0], content.removePrefix("$commandName "), storedGuild, cmd)
+            }
+
+            if (cmd.guildOnly && event.guild == null) {
+                return event.channel.sendMessage("This command can only be used in a server!").queue()
+            }
+
+            if ("h" in args.argMap || "help" in args.argMap) {
+                return event.channel.sendMessage(CommandManager.help(commandName, baseCommand)).queue()
+            }
+
             try {
-                val ctx = Context(event, args, cmd, typedArgs, storedGuild)
+                checkPermissions(event, cmd)
+                checkBotPermissions(event, cmd)
+            } catch (e: Exception) {
+                return when (e) {
+                    is MemberMissingPermissionException -> {
+                        event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
+                    }
 
-                cmd.run(ctx)
-            } catch(e: Exception) {
-                e.printStackTrace()
+                    is BotMissingPermissionException -> {
+                        event.channel.sendMessage("Bot missing permission: ${e.perm.getName()}").queue()
+                    }
+
+                    else -> e.printStackTrace()
+                }
             }
+
+            val fut = getTypedArgs(event, cmd, args.unmatched)
+
+            fut.exceptionally { e ->
+                when (e) {
+                    is ArgumentTypeException -> {
+                        event.channel.sendMessage("Argument ${e.input} is not of type ${e.type.simpleName!!}!").queue()
+                    }
+
+                    is ArgumentRequiredException -> {
+                        event.channel.sendMessage("Argument ${e.name} is required!").queue()
+                    }
+
+                    is MemberNotFoundException -> {
+                        event.channel.sendMessage("No members found for ${e.input}!").queue()
+                    }
+
+                    is RoleNotFoundException -> {
+                        event.channel.sendMessage("No roles found for ${e.input}!").queue()
+                    }
+
+                    is MemberMissingPermissionException -> {
+                        event.channel.sendMessage("Missing permission: ${e.perm.getName()}").queue()
+                    }
+
+                    is BotMissingPermissionException -> {
+                        event.channel.sendMessage("Bot missing permission: ${e.perm.getName()}").queue()
+                    }
+
+                    else -> e.printStackTrace()
+                }
+
+                null
+            }
+
+            fut.thenAccept { typedArgs ->
+                try {
+                    val ctx = Context(event, args, cmd, typedArgs, storedGuild)
+
+                    cmd.run(ctx)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        } catch (e: UnclosedQuoteError) {
+            event.channel.sendMessage("Unclosed quote found!").queue()
         }
     }
 
