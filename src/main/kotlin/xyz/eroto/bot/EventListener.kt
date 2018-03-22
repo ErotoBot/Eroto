@@ -296,6 +296,7 @@ class EventListener : ListenerAdapter() {
                             val futt = MemberPicker(event.member!!, mems).build(event.message)
 
                             futt.exceptionally {
+                                fut.completeExceptionally(it)
                                 null
                             }
 
@@ -323,6 +324,7 @@ class EventListener : ListenerAdapter() {
                             val futt = RolePicker(event.member!!, roles).build(event.message)
 
                             futt.exceptionally {
+                                fut.completeExceptionally(it)
                                 null
                             }
 
@@ -333,7 +335,7 @@ class EventListener : ListenerAdapter() {
                             }
                         }
 
-                        else -> throw MemberNotFoundException(userArg)
+                        else -> throw RoleNotFoundException(userArg)
                     }
                 }
 
