@@ -21,6 +21,7 @@ fun main(args: Array<String>) {
                 System.getenv("BOT_SHARDS")?.toInt() ?: 1,
                 System.getenv("BOT_FIRST_SHARD")?.toInt() ?: 0,
                 System.getenv("BOT_LAST_SHARD")?.toInt() ?: 0,
+                System.getenv("BOT_WEEBSHTOKEN") ?: "",
                 PostgresConfig(
                         System.getenv("POSTGRES_HOST") ?: "localhost",
                         System.getenv("POSTGRES_USER") ?: System.getenv("USERNAME") ?: return println("No user configured!"),
