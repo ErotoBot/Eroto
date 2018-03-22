@@ -30,7 +30,9 @@ class Cry : Command() {
         fut.thenAccept { res ->
             val json = JSONObject(res.body()!!.string())
 
-            ctx.send(json.getString("url"))
+            val embed = EmbedBuilder().setImage(json.getString("url")).build()
+
+            ctx.send(embed)
 
             res.close()
         }

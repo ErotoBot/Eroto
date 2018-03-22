@@ -1,5 +1,6 @@
 package xyz.eroto.bot.commands.weebsh
 
+import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.Member
 import okhttp3.Response
 import org.json.JSONObject
@@ -39,7 +40,9 @@ class Hug : Command() {
 
             val msg = "${target.asMention}, you got a hug from ${ctx.author.asMention}"
 
-            ctx.send(json.getString("url"))
+            val embed = EmbedBuilder().setImage(json.getString("url")).build()
+
+            ctx.send(msg, embed)
 
             res.close()
         }
