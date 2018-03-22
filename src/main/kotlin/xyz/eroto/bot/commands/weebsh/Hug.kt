@@ -24,7 +24,7 @@ class Hug : Command() {
     }
 
     override fun run(ctx: Context) {
-        val fut = Http.get("https://api.weeb.sh/images/random?type=cry", { headers.entries.map { header(it.key, it.value) } })
+        val fut = Http.get("https://api.weeb.sh/images/random?type=hug", { headers.entries.map { header(it.key, it.value) } })
 
         fut.exceptionally {
             ctx.send(it.toString())
