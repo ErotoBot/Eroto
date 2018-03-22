@@ -96,25 +96,18 @@ object ArgParser {
                     throw EmptyKeyError("empty key while reading \"$token\"", token)
                 }
 
+                if (k.startsWith("-")) {
+                    continue
+                }
+
                 if (cut > 1) { // long form
-                    if (v.isEmpty()) {
-                        nextKey = k
-                    } else {
-                        argMap[k] = v
-                    }
+                    argMap[k] = if (v.isEmpty()) null else v
                 } else { // short form
                     val lastK = k.last().toString()
-                    if (v.isEmpty()) {
-                        nextKey = lastK
-                    } else {
-                        argMap[lastK] = v
-                    }
+                    argMap[lastK] = if (v.isEmpty()) null else v
                     val head = k.dropLast(1).map { it.toString() }
                     head.forEach { argMap[it] = null }
                 }
-            } else if (nextKey != null) {
-                argMap[nextKey] = token
-                nextKey = null
             } else {
                 unmatched.add(token)
             }
