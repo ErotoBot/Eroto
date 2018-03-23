@@ -13,6 +13,7 @@ data class APIConfig(
 
 data class Config(
         val token: String,
+        val owners: List<String>,
         val prefixes: List<String>,
         val shards: Int = 1,
         val firstShard: Int = 0,

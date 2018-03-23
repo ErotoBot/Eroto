@@ -5,6 +5,7 @@ abstract class Command(val name: String? = null) {
     abstract val example: String
 
     open var guildOnly = false
+    open var ownerOnly = false
     open var category = Category.OTHER
     
     val subcommands = mutableListOf<Subcommand>()

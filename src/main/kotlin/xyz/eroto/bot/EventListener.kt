@@ -99,6 +99,9 @@ class EventListener : ListenerAdapter() {
                         ?: return
             }
 
+            if (cmd.ownerOnly && event.author.id !in Eroto.config.owners)
+                return
+
             val tokenized = ArgParser.tokenize(content)
             val args = ArgParser.parsePosix(tokenized)
 
