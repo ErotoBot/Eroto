@@ -18,6 +18,7 @@ fun main(args: Array<String>) {
         Config(
                 System.getenv("BOT_TOKEN") ?: return println("Token not found!"),
                 System.getenv("BOT_PREFIXES").split("::"),
+                System.getenv("BOT_OWNERS").split("::"),
                 System.getenv("BOT_SHARDS")?.toInt() ?: 1,
                 System.getenv("BOT_FIRST_SHARD")?.toInt() ?: 0,
                 System.getenv("BOT_LAST_SHARD")?.toInt() ?: 0,
