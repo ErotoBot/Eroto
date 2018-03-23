@@ -10,7 +10,7 @@ class Kick : Command() {
 
     init {
         arguments += argument<Array<Member>>("users")
-        arguments += argument<String>("reason", optional = true)
+        arguments += argument<String>("reason", defaultValue = "No reason given.")
         permissions += MemberPermission(Permission.KICK_MEMBERS)
         botPermissions += BotPermission(Permission.KICK_MEMBERS)
     }
@@ -28,7 +28,7 @@ class Kick : Command() {
         }
 
         for (user in users) {
-            ctx.guild!!.controller.kick(user, reason)
+            ctx.guild!!.controller.kick(user, "${ctx.author.name}#${ctx.author.discriminator} (${ctx.author.id}): $reason").queue()
         }
 
         ctx.send(":ok_hand:")
