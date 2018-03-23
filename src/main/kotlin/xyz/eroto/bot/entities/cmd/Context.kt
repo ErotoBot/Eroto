@@ -1,7 +1,9 @@
 package xyz.eroto.bot.entities.cmd
 
 import me.aurieh.ares.utils.ArgParser
+import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.Message
@@ -32,11 +34,16 @@ class Context(
             = event.channel.sendMessage(content).queue(success)
     fun send(content: String, success: (Message) -> Unit, fail: (Throwable) -> Unit)
             = event.channel.sendMessage(content).queue(success, fail)
-
     fun send(content: MessageEmbed)
             = event.channel.sendMessage(content).queue()
     fun send(content: MessageEmbed, success: (Message) -> Unit)
             = event.channel.sendMessage(content).queue(success)
     fun send(content: MessageEmbed, success: (Message) -> Unit, fail: (Throwable) -> Unit)
             = event.channel.sendMessage(content).queue(success, fail)
+    fun send(content: String, embed: MessageEmbed)
+            = event.channel.sendMessage(content).embed(embed).queue()
+    fun send(content: String, embed: MessageEmbed, success: (Message) -> Unit)
+            = event.channel.sendMessage(content).embed(embed).queue(success)
+    fun send(content: String, embed: MessageEmbed, success: (Message) -> Unit, fail: (Throwable) -> Unit)
+            = event.channel.sendMessage(content).embed(embed).queue(success, fail)
 }
