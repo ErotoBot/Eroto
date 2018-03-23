@@ -6,10 +6,10 @@ import xyz.eroto.bot.entities.cmd.argument
 import xyz.eroto.bot.entities.cmd.variant.WolkCommand
 import xyz.eroto.bot.utils.WolkType
 
-class Hug : WolkCommand() {
-    override val type = WolkType.HUG
-    override val description = "Hug someone"
-    override val example = "hug @user"
+class Lick : WolkCommand() {
+    override val type = WolkType.LICK
+    override val description = "Lick someone, tasty~"
+    override val example = "lick @user"
 
     init {
         arguments += argument<Member>("user")
@@ -18,6 +18,6 @@ class Hug : WolkCommand() {
     override fun title(ctx: Context) : String {
         val target = ctx.args["user"] as Member
 
-        return "${target.nickname ?: target.user.name}, you got a hug from ${ctx.member?.nickname ?: ctx.author.name}"
+        return "${target.nickname ?: target.user.name}, you got a lick from ${ctx.member?.nickname ?: ctx.author.name}"
     }
 }

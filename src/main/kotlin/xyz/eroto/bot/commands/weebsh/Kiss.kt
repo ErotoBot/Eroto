@@ -18,6 +18,6 @@ class Kiss : WolkCommand() {
     override fun title(ctx: Context) : String {
         val target = ctx.args["user"] as Member
 
-        return "${target.user.name}, you got a hug from ${ctx.author.name}"
+        return "${target.nickname ?: target.user.name}, you got a kiss from ${ctx.member?.nickname ?: ctx.author.name}"
     }
 }
