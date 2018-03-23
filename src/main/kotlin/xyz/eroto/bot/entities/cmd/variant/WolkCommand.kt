@@ -21,6 +21,7 @@ abstract class WolkCommand(name: String? = null) : Command(name) {
                 setColor(color)
                 setImage(res.url)
                 setTitle(title(ctx))
+                setFooter("Powered by weeb.sh", null)
             }.build())
         }
 
