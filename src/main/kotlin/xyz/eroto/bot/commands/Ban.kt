@@ -12,7 +12,7 @@ class Ban : Command() {
         guildOnly = true
 
         arguments += argument<Array<Member>>("users")
-        arguments += argument<String>("reason", optional = true)
+        arguments += argument<String>("reason", optional = true, defaultValue = "No reason given.")
         permissions += MemberPermission(Permission.BAN_MEMBERS)
         botPermissions += BotPermission(Permission.BAN_MEMBERS)
     }
@@ -30,7 +30,7 @@ class Ban : Command() {
         }
 
         for (user in users) {
-            ctx.guild!!.controller.ban(user, 7, reason).queue()
+            ctx.guild!!.controller.ban(user, 7, "${ctx.author.name}#${ctx.author.discriminator} (${ctx.author.id}): $reason").queue()
         }
 
         ctx.send(":ok_hand:")
