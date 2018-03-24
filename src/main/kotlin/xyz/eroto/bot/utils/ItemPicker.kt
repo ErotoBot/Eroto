@@ -24,7 +24,7 @@ class ItemPicker(
     private val cancelEmote = "\u23F9"
 
     val items = mutableListOf<PickerItem>()
-    var color: Color = Color.CYAN
+    var color: Color = Color(250, 239, 211)
 
     fun build(msg: Message) = build(msg.channel)
 
