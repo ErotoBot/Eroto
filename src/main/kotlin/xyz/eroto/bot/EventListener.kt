@@ -105,11 +105,9 @@ class EventListener : ListenerAdapter() {
             val tokenized = ArgParser.tokenize(content)
             val args = ArgParser.parsePosix(tokenized)
 
-            if (args.unmatched.isNotEmpty() && cmd.subcommands.any {
-                        (it.name ?: it::class.simpleName!!).toLowerCase() == args.unmatched[0].toLowerCase()
-                    }) {
-
-                return executeCommand(event, args.unmatched[0], content.removePrefix("$commandName "), storedGuild, cmd)
+            if (args.unmatched.isNotEmpty()
+                    && cmd.subcommands.any { (it.name ?: it::class.simpleName!!).toLowerCase() == args.unmatched[0].toLowerCase() }) {
+                return executeCommand(event, args.unmatched[0], content.removePrefix(args.unmatched[0]).trim(), storedGuild, cmd)
             }
 
             if (cmd.guildOnly && event.guild == null) {
