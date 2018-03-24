@@ -1,4 +1,4 @@
-package xyz.eroto.bot.commands
+package xyz.eroto.bot.commands.moderation
 
 import me.aurieh.ares.exposed.async.asyncTransaction
 import net.dv8tion.jda.core.Permission

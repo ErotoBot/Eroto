@@ -1,4 +1,4 @@
-package xyz.eroto.bot.commands.weebsh
+package xyz.eroto.bot.commands.image
 
 import net.dv8tion.jda.core.entities.Member
 import xyz.eroto.bot.entities.cmd.Context

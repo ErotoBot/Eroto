@@ -1,4 +1,4 @@
-package xyz.eroto.bot.commands.weebsh
+package xyz.eroto.bot.commands.image
 
 import net.dv8tion.jda.core.entities.Member
 import xyz.eroto.bot.entities.cmd.Context
@@ -6,10 +6,10 @@ import xyz.eroto.bot.entities.cmd.argument
 import xyz.eroto.bot.entities.cmd.variant.WolkCommand
 import xyz.eroto.bot.utils.WolkType
 
-class Insult : WolkCommand() {
-    override val type = WolkType.INSULT
-    override val description = "insult someone"
-    override val example = "insult @user"
+class Cuddle : WolkCommand() {
+    override val type = WolkType.CUDDLE
+    override val description = "cuddle someone"
+    override val example = "cuddle @user"
 
     init {
         arguments += argument<Member>("user")
@@ -18,6 +18,6 @@ class Insult : WolkCommand() {
     override fun title(ctx: Context) : String {
         val target = ctx.args["user"] as Member
 
-        return "${target.nickname ?: target.user.name}, you got insulted by ${ctx.member?.nickname ?: ctx.author.name}"
+        return "${target.nickname ?: target.user.name}, you got a cuddle from ${ctx.member?.nickname ?: ctx.author.name}"
     }
 }

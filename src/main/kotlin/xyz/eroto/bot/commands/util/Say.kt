@@ -1,4 +1,4 @@
-package xyz.eroto.bot.commands
+package xyz.eroto.bot.commands.util
 
 import xyz.eroto.bot.entities.cmd.Command
 import xyz.eroto.bot.entities.cmd.Context

@@ -8,7 +8,8 @@ data class PostgresConfig(
 )
 
 data class APIConfig(
-        val weebsh: String
+        val weebsh: String,
+        val google: String
 )
 
 data class Config(

@@ -97,15 +97,26 @@ class RolePicker(
         channel.sendMessage(inputText).queue({ msg ->
             waiter.await<MessageReceivedEvent>(1, timeout) {
                 if (it.channel.id == msg.channel.id && it.author.id == user.user.id) {
-                    if (it.message.contentRaw.toIntOrNull() == null) {
-                        msg.channel.sendMessage("Invalid number").queue()
-                    } else if (it.message.contentRaw.toInt() - 1 > roles.size || it.message.contentRaw.toInt() - 1 < 0) {
-                        msg.channel.sendMessage("Number out of bounds!").queue()
-                    } else {
-                        index = it.message.contentRaw.toInt() - 1
-                        msg.delete().queue()
-                        fut.complete(roles[index])
+                    when {
+                        it.message.contentRaw.toLowerCase().startsWith("cancel") -> return@await true
+
+                        it.message.contentRaw.toIntOrNull() == null -> {
+                            msg.channel.sendMessage("Invalid number").queue()
+                            return@await false
+                        }
+
+                        it.message.contentRaw.toInt() - 1 > roles.size || it.message.contentRaw.toInt() - 1 < 0 -> {
+                            msg.channel.sendMessage("Number out of bounds!")
+                            return@await false
+                        }
+
+                        else -> {
+                            index = it.message.contentRaw.toInt() - 1
+                            msg.delete().queue()
+                            fut.complete(roles[index])
+                        }
                     }
+
                     true
                 } else {
                     false

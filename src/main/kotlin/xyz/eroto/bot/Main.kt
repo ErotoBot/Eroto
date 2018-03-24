@@ -29,7 +29,8 @@ fun main(args: Array<String>) {
                         System.getenv("POSTGRES_DATABASE") ?: "eroto"
                 ),
                 APIConfig(
-                        System.getenv("WEEBSH_TOKEN") ?: return println("No weebsh token given!")
+                        System.getenv("WEEBSH_TOKEN") ?: return println("No image token given!"),
+                        System.getenv("GOOGLE_API_KEY") ?: return println("No google API key given!")
                 )
         )
     } else {

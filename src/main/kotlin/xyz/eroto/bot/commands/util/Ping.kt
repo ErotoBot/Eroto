@@ -1,4 +1,4 @@
-package xyz.eroto.bot.commands
+package xyz.eroto.bot.commands.util
 
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member

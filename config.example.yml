@@ -1,7 +1,16 @@
 token: your token
+owners:
+  - owner
 shards: 1
 firstShard: 0
 lastShard: 0
 prefixes:
-  - "eroto "
-  - "e!!"
+  - unique prefix 1
+postgres:
+  host: db host
+  username: db user
+  password: db pass
+  database: db name
+api:
+  weebsh: weeb.sh token
+  google: google api key

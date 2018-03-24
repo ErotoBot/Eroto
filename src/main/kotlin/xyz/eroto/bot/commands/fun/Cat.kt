@@ -1,4 +1,4 @@
-package xyz.eroto.bot.commands
+package xyz.eroto.bot.commands.`fun`
 
 import okhttp3.Response
 import org.json.JSONObject

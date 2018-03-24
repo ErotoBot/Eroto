@@ -1,10 +1,9 @@
-package xyz.eroto.bot.commands
+package xyz.eroto.bot.commands.moderation
 
 import me.aurieh.ares.exposed.async.asyncTransaction
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.Role
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.update
 import xyz.eroto.bot.Eroto
 import xyz.eroto.bot.entities.cmd.*
