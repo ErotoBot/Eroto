@@ -8,6 +8,7 @@ import org.reflections.util.ConfigurationBuilder
 import xyz.eroto.bot.entities.cmd.Command
 import xyz.eroto.bot.entities.cmd.Subcommand
 import xyz.eroto.bot.entities.exceptions.CommandNotFoundException
+import java.awt.Color
 import kotlin.reflect.full.isSubclassOf
 
 class CommandManager {
@@ -39,9 +40,6 @@ class CommandManager {
         }
 
         fun help(command: String, baseCommand: Command? = null): MessageEmbed {
-            if (command !in commands)
-                throw CommandNotFoundException(command)
-
             val cmd = if (baseCommand != null) {
                 baseCommand.subcommands.firstOrNull {
                     (it.name ?: it::class.simpleName!!).toLowerCase() == command.toLowerCase()
@@ -52,8 +50,7 @@ class CommandManager {
 
             return EmbedBuilder().apply {
                 setTitle((cmd.name ?: cmd::class.simpleName!!.toLowerCase()).capitalize())
-                val args = cmd.arguments.map {
-                    println(it)
+                val args = cmd.arguments.joinToString(" ") {
                     if (it.optional || it.defaultValue != null) {
                         "[${it.displayName ?: it.name}]"
                     } else {
@@ -61,9 +58,37 @@ class CommandManager {
                     }
                 }
 
-                descriptionBuilder.appendln("`${(cmd.name ?: cmd::class.simpleName!!)} $args`")
-
                 descriptionBuilder.appendln(cmd.description)
+
+                val prefix = Eroto.config.prefixes.first()
+
+                addField(
+                        "Category",
+                        cmd.category.name.toLowerCase().capitalize(),
+                        true
+                )
+
+                addField(
+                        "Usage",
+                        "`$prefix${(cmd.name ?: cmd::class.simpleName!!).toLowerCase()} $args`",
+                        true
+                )
+
+                addField(
+                        "Example",
+                        prefix + cmd.example,
+                        true
+                )
+
+                if (cmd.subcommands.isNotEmpty()) {
+                    addField(
+                            "Subcommands",
+                            cmd.subcommands.joinToString("\n") { (it.name ?: it::class.simpleName!!).toLowerCase() },
+                            true
+                    )
+                }
+
+                setColor(Color(250, 239, 211))
             }.build()
         }
     }
