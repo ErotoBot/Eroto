@@ -222,7 +222,7 @@ class EventListener : ListenerAdapter() {
         } catch (e: PermissionDeniedException) {
             return
         } catch (e: Exception) {
-            e.printStackTrace()g
+            e.printStackTrace()
         }
     }
 
