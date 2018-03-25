@@ -12,7 +12,7 @@ class Ban : Command() {
         guildOnly = true
 
         arguments += argument<Array<Member>>("users")
-        arguments += argument<String>("reason", optional = true, defaultValue = "No reason given.")
+        arguments += argument<String>("reason", defaultValue = "No reason given.")
         permissions += MemberPermission(Permission.BAN_MEMBERS)
         botPermissions += BotPermission(Permission.BAN_MEMBERS)
     }
