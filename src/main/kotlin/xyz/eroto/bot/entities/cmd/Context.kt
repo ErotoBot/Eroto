@@ -50,17 +50,17 @@ class Context(
     fun send(content: String, embed: MessageEmbed, success: (Message) -> Unit, fail: (Throwable) -> Unit)
             = event.channel.sendMessage(content).embed(embed).queue(success, fail)
 
-    fun sendException(e: Exception) {
+    fun sendException(e: Throwable) {
         val mess = e.message
 
         val list = e.stackTrace.map {
-            "\t* ${it.className}#${it.methodName} (${it.fileName}:${it.lineNumber})"
+            "\t @ ${it.className}#${it.methodName} (${it.fileName}:${it.lineNumber})"
         }
 
         val formatted = list.slice(0 until min(list.size, 3)).joinToString("\n")
 
         event.channel.sendMessage(
-                "Oh no! An error occured!\n\n````asciidoc\n$e\n$formatted```\n\nPlease report this in my support server!"
+                "Oh no! An error occured!\n\n```asciidoc\n*$e*\n$formatted```\n\nPlease report this in my support server!"
         ).queue()
     }
 }

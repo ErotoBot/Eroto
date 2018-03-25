@@ -45,14 +45,16 @@ class EventListener : ListenerAdapter() {
                         it[id] = event.guild.idLong
                         it[prefixes] = arrayOf()
                         it[mutedRole] = null
+                        it[perms] = arrayOf()
                     }
 
-                    StoredGuild(event.guild.idLong, listOf(), null)
+                    StoredGuild(event.guild.idLong, listOf(), null, listOf())
                 } else {
                     StoredGuild(
                             event.guild.idLong,
                             guild[GuildsTable.prefixes].toList(),
-                            guild[GuildsTable.mutedRole]
+                            guild[GuildsTable.mutedRole],
+                            guild[GuildsTable.perms].toList()
                     )
                 }
 
@@ -64,7 +66,7 @@ class EventListener : ListenerAdapter() {
                 val prefixLess = content.removePrefix(usedPrefix)
                 val cmd = prefixLess.split(" ")[0]
 
-                executeCommand(event, cmd, prefixLess.removePrefix(cmd).trim(), stored)
+                executeCommand(event, cmd, prefixLess.removePrefix(cmd).trim(), cmd, stored)
             }.execute().exceptionally {
                 it.printStackTrace()
             }
@@ -76,7 +78,7 @@ class EventListener : ListenerAdapter() {
             val prefixLess = content.removePrefix(usedPrefix)
             val cmd = prefixLess.split(" ")[0]
 
-            executeCommand(event, cmd, prefixLess.removePrefix(cmd).trim())
+            executeCommand(event, cmd, prefixLess.removePrefix(cmd).trim(), cmd)
         }
     }
 
@@ -84,6 +86,7 @@ class EventListener : ListenerAdapter() {
             event: MessageReceivedEvent,
             commandName: String,
             content: String,
+            guildPerm: String,
             storedGuild: StoredGuild? = null,
             baseCommand: Command? = null
     ) {
@@ -107,15 +110,51 @@ class EventListener : ListenerAdapter() {
 
             if (args.unmatched.isNotEmpty()
                     && cmd.subcommands.any { (it.name ?: it::class.simpleName!!).toLowerCase() == args.unmatched[0].toLowerCase() }) {
-                return executeCommand(event, args.unmatched[0], content.removePrefix(args.unmatched[0]).trim(), storedGuild, cmd)
+                return executeCommand(
+                        event,
+                        args.unmatched[0],
+                        content.removePrefix(args.unmatched[0]).trim(),
+                        "$guildPerm>${args.unmatched[0]}",
+                        storedGuild,
+                        cmd
+                )
+            }
+
+            if ("h" in args.argMap || "help" in args.argMap) {
+                return event.channel.sendMessage(CommandManager.help(commandName, baseCommand)).queue()
             }
 
             if (cmd.guildOnly && event.guild == null) {
                 return event.channel.sendMessage("This command can only be used in a server!").queue()
             }
 
-            if ("h" in args.argMap || "help" in args.argMap) {
-                return event.channel.sendMessage(CommandManager.help(commandName, baseCommand)).queue()
+            if (event.guild != null) {
+                for (perm in storedGuild!!.perms) {
+                    val parts = perm.split(".")
+
+                    val first = parts[0]
+                    val sec = parts[1]
+                    val thrd = parts[2]
+
+                    if (!first.startsWith("c") || !sec.startsWith("u")) {
+                        continue
+                    }
+
+                    val c = first.removePrefix("c")
+                    val u = sec.removePrefix("u")
+
+
+                    if (u != event.author.id && u != "*" || c != event.channel.id && c != "*") {
+                        continue
+                    }
+
+                    if (thrd == "*"
+                            || thrd == guildPerm
+                            || guildPerm.startsWith(thrd)
+                            || thrd == guildPerm.split(">")[0] + ">*") {
+                        throw PermissionDeniedException()
+                    }
+                }
             }
 
             try {
@@ -180,6 +219,10 @@ class EventListener : ListenerAdapter() {
             }
         } catch (e: UnclosedQuoteError) {
             event.channel.sendMessage("Unclosed quote found!").queue()
+        } catch (e: PermissionDeniedException) {
+            return
+        } catch (e: Exception) {
+            e.printStackTrace()g
         }
     }
 

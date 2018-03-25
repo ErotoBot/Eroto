@@ -9,3 +9,7 @@ fun Guild.searchMembers(query: String) = members.filter {
 fun Guild.searchRole(query: String) = roles.filter {
     query in "${it.asMention} ${it.name} @${it.name} ${it.id}"
 }
+
+fun Guild.searchTextChannel(query: String) = textChannels.filter {
+    query in "${it.asMention} #${it.name} ${it.id}"
+}
